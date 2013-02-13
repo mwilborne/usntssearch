@@ -50,19 +50,19 @@ print '~*~ ~*~ NZBMegasearcH (v. '+ str(ver_notify['curver']) + ') ~*~ ~*~'
 def search():
 	return megasearch.dosearch(request.args, cfg, ver_notify)
 
-@app.route('/config', methods=['GET','POST'])
-def config():
-	return config_settings.config_read()
+#@app.route('/config', methods=['GET','POST'])
+#def config():
+#	return config_settings.config_read()
 			
 @app.route('/', methods=['GET','POST'])
 def main_index():
-	global first_time,cfg,cgen
-	if request.method == 'POST':
-		config_settings.config_write(request.form)
-		first_time = 0
-	cfg,cgen = config_settings.read_conf()
-	if first_time == 1:
-		return config_settings.config_read()
+#	global first_time,cfg,cgen
+#	if request.method == 'POST':
+#		config_settings.config_write(request.form)
+#		first_time = 0
+#	cfg,cgen = config_settings.read_conf()
+#	if first_time == 1:
+#		return config_settings.config_read()
 	return megasearch.dosearch('', cfg, ver_notify)
 
 @app.errorhandler(404)
@@ -76,8 +76,5 @@ if __name__ == "__main__":
 	#~ print '>> Running on port '	+ str(cport)
 	#~ app.run(host=chost,port=cport)
 
-	#~ http_server = HTTPServer(WSGIContainer(app))
-	#~ http_server.listen(5005)
-	#~ IOLoop.instance().start()
     
 
