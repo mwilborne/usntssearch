@@ -16,6 +16,7 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #
 import requests
 import json
+import sys
 import datetime
 import time
 import config_settings
@@ -67,6 +68,7 @@ def loadSearchModules(moduleDir = None):
 
 # Perform a search using all available modules
 def performSearch(queryString,  cfg):
+	queryString = queryString.strip()
 	# Perform the search using every module
 	global globalResults
 	if 'loadedModules' not in globals():
@@ -83,7 +85,7 @@ def performSearch(queryString,  cfg):
 				threadHandles.append(t)
 			except Exception as e:
 				print 'Error starting thread  : ' + str(e)
-
+	sys.stdout.flush()	
 	for t in threadHandles:
 		t.join()
 	print '=== All Search Threads Finished ==='
@@ -91,7 +93,7 @@ def performSearch(queryString,  cfg):
 
 def performSearchThread(queryString, loadedModules, lock,cfg):
 	localResults = []
-	print "Searching w " + cfg['type']
+	sys.stdout.write(cfg['type'] + ' ')
 	for module in loadedModules:
 		if( module.typesrch == cfg['type']):
 			localResults = module.search(queryString, cfg)
@@ -101,19 +103,7 @@ def performSearchThread(queryString, loadedModules, lock,cfg):
 		lock.release()
 	except Exception as e:
 		print e
-
-	
-def performSearchThread2(queryString, module, lock,configOptions):
-	print 'starting search thread'
-	print module.typesrch
-	localResults = []
-	#~ module.search(queryString)
-	lock.acquire()
-	globalResults.append(localResults)
-	try:
-		lock.release()
-	except Exception as e:
-		print e
+ 
 
 # Exception to be raised when a search function is not implemented
 class NotImplementedException(Exception):

@@ -9,14 +9,14 @@
 	<body>
 		<div id="container">
 			<span id="loader" style="visibility:hidden;"><img src="static/loadingicon.gif" width="75" height="75" /></span>
-			<div  class="titlemain"><img src="static/title.png" width="302" height="33" /></div>
+			<div  class="titlemain"><img src="static/title.png" width="387" height="45" /></div>
 			<form action="/s" method="get" class="form-wrapper-01">
 				<input type="text" id="search" placeholder="Enter your keyword" name="q"><input type="submit" value="Search" id="submit" onclick="show_loader()">
 			</form>
 			{% if results -%}
 			<table id="results" summary="Search Results">
 				<thead>
-					<tr><th scope="col" class=titlecell>Title</th><th scope="col" class=sizecell>Size</th> <th scope="col" class=datecell>Days</th> <th scope="col" class=providercell>Provider</th></tr>
+					<tr><th scope="col" class=titlecell><a href="s?q={{ args['q'] }}&order=t">Title</a></th><th scope="col" class=sizecell><a href="s?q={{ args['q'] }}&order=s">Size</a></th> <th scope="col" class=datecell><a href="s?q={{ args['q'] }}&order=d">Days</a></th> <th scope="col" class=providercell><a href="s?q={{ args['q'] }}&order=p">Provider</a></th></tr>
 				</thead>
 				<tbody>
 				{% for row in results -%}
