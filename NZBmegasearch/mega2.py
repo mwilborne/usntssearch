@@ -21,10 +21,10 @@ import os
 import SearchModule
 import megasearch
 import config_settings
-import miscdefs
+#~ import miscdefs
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
-
+first_time=0
 app = Flask(__name__)
 SearchModule.loadSearchModules()
 cfg,cgen = config_settings.read_conf()
@@ -73,7 +73,7 @@ def generic_error(error):
 if __name__ == "__main__":	
 	if( ver_notify['chk'] == -1):
 		ver_notify['chk'] = miscdefs.chk(ver_notify['curver'])
-	print '>> Running on port '	+ str(cport)
+	#~ print '>> Running on port '	+ str(cport)
 	#~ app.run(host=chost,port=cport)
 
 	#~ http_server = HTTPServer(WSGIContainer(app))
