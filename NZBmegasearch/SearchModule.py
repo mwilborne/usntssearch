@@ -85,15 +85,15 @@ def performSearch(queryString,  cfg):
 				threadHandles.append(t)
 			except Exception as e:
 				print 'Error starting thread  : ' + str(e)
-	sys.stdout.flush()	
+	#~ sys.stdout.flush()	
 	for t in threadHandles:
 		t.join()
-	print '=== All Search Threads Finished ==='
+	#~ print '=== All Search Threads Finished ==='
 	return globalResults
 
 def performSearchThread(queryString, loadedModules, lock,cfg):
 	localResults = []
-	sys.stdout.write(cfg['type'] + ' ')
+	#~ sys.stdout.write(cfg['type'] + ' ')
 	for module in loadedModules:
 		if( module.typesrch == cfg['type']):
 			localResults = module.search(queryString, cfg)

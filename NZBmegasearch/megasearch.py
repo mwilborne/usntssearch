@@ -25,11 +25,11 @@ from flask import render_template
 
 import SearchModule
 
+ 
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+
 def dosearch(args, cfg, ver_notify):
 	if(len(args)):
-		#~ print 'ENTER SLEEP'
-		#~ time.sleep (10)
-		#~ print 'EXIT SLEEP'
 		results = SearchModule.performSearch(args['q'], cfg )
 		results = summary_results(results,args['q'])
 		return cleanUpResults(results, ver_notify, args)
@@ -79,11 +79,6 @@ def summary_results(rawResults,strsearch):
 			findone = 1
 		else:
 			results[z]['ignore'] = 1	
-		#~ print findone
-		#~ print strsearch1_collection
-		#~ print sptitle_collection[z]
-		#~ print str(len(intrs)) + " " + str(len(strsearch1_collection))
-		#~ print '========'
 		
 		if(findone):
 			#~ print titles[z]
@@ -93,9 +88,6 @@ def summary_results(rawResults,strsearch):
 					sz2 = float(results[v]['size'])
 					if( abs(sz1-sz2) < 5000000):
 						results[z]  ['ignore'] = 1
-
-	#~ no sort
-	#~ results = sorted(results, key=itemgetter('posting_date_timestamp'), reverse=True) 
 					
 	return results
 
@@ -149,12 +141,3 @@ def cleanUpResults(results, ver_notify, args):
 		})
 
 	return render_template('main_page.html',results=niceResults, exist=existduplicates, vr=ver_notify, args=args )
-
-#~ debug
-if __name__ == "__main__":
-	print 'Save to file'
-	webbuf_ret = dosearch('Hotel.Impossible.S01E01')
-	myFile = open('results.html', 'w')
-	myFile.write(webbuf_ret)
-	myFile.close()
-

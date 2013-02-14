@@ -9,6 +9,11 @@
 	<body>
 		<div id="container">
 			<span id="loader" style="visibility:hidden;"><img src="static/loadingicon.gif" width="75" height="75" /></span>
+			<div class="alert-info">
+			Experimental service. Server will be switched off 02.15. <br>
+			<a href='https://nzbx.co/' style="color:#ffffff;">* Please, donate to nzbx.co for the new hosting *</a> 
+			</div>
+
 			<div  class="titlemain"><img src="static/title.png" width="387" height="45" /></div>
 			<form action="/s" method="get" class="form-wrapper-01">
 				<input type="text" id="search" placeholder="Enter your keyword" name="q"><input type="submit" value="Search" id="submit" onclick="show_loader()">
@@ -55,26 +60,26 @@
 			{%- endif %}
 						
 		</div>
+		<div class="topright_tight"><a href='https://nzbx.co/dmca'>DCMA</a></div>
+		<div class="bottomcenter">ver. {{ vr['curver'] }} -- 0byte</div>
 
-
-<!-- Start of StatCounter Code for Default Guide -->
-<script type="text/javascript">
-var sc_project=8707188; 
-var sc_invisible=1; 
-var sc_security="f3bafd7f"; 
-var scJsHost = (("https:" == document.location.protocol) ?
-"https://secure." : "http://www.");
-document.write("<sc"+"ript type='text/javascript' src='" +
-scJsHost+
-"statcounter.com/counter/counter.js'></"+"script>");
-</script>
-<noscript><div class="statcounter"><a title="web analytics"
-href="http://statcounter.com/" target="_blank"><img
-class="statcounter"
-src="http://c.statcounter.com/8707188/0/f3bafd7f/1/"
-alt="web analytics"></a></div></noscript>
-<!-- End of StatCounter Code for Default Guide -->
-
+		<!-- Start of StatCounter Code for Default Guide -->
+		<script type="text/javascript">
+		var sc_project=8707188; 
+		var sc_invisible=1; 
+		var sc_security="f3bafd7f"; 
+		var scJsHost = (("https:" == document.location.protocol) ?
+		"https://secure." : "http://www.");
+		document.write("<sc"+"ript type='text/javascript' src='" +
+		scJsHost+
+		"statcounter.com/counter/counter.js'></"+"script>");
+		</script>
+		<noscript><div class="statcounter"><a title="web analytics"
+		href="http://statcounter.com/" target="_blank"><img
+		class="statcounter"
+		src="http://c.statcounter.com/8707188/0/f3bafd7f/1/"
+		alt="web analytics"></a></div></noscript>
+		<!-- End of StatCounter Code for Default Guide -->
 
 	</body>
 </html>

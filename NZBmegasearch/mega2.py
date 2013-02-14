@@ -17,14 +17,11 @@
 
 from flask import Flask
 from flask import request, Response
-import os
 import SearchModule
 import megasearch
 import config_settings
-#~ import miscdefs
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
-first_time=0
 app = Flask(__name__)
 SearchModule.loadSearchModules()
 cfg,cgen = config_settings.read_conf()
@@ -37,34 +34,15 @@ ver_notify= { 'chk':0,
 print '~*~ ~*~ NZBMegasearcH (v. '+ str(ver_notify['curver']) + ') ~*~ ~*~'
 	
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-#~ first time configuration check
-#~ first_time = 1
-#~ if os.path.exists("custom_params.ini"):
-	#~ first_time = 0
-	#~ print '>> NZBMegasearcH is configured'
-#~ else:	
-	#~ print '>> NZBMegasearcH will be configured'	
-#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 @app.route('/s', methods=['GET'])
 def search():
 	return megasearch.dosearch(request.args, cfg, ver_notify)
-
-#@app.route('/config', methods=['GET','POST'])
-#def config():
-#	return config_settings.config_read()
 			
 @app.route('/', methods=['GET','POST'])
 def main_index():
-#	global first_time,cfg,cgen
-#	if request.method == 'POST':
-#		config_settings.config_write(request.form)
-#		first_time = 0
-#	cfg,cgen = config_settings.read_conf()
-#	if first_time == 1:
-#		return config_settings.config_read()
 	return megasearch.dosearch('', cfg, ver_notify)
-
+ 
 @app.errorhandler(404)
 def generic_error(error):
 	return main_index()
@@ -73,8 +51,6 @@ def generic_error(error):
 if __name__ == "__main__":	
 	if( ver_notify['chk'] == -1):
 		ver_notify['chk'] = miscdefs.chk(ver_notify['curver'])
-	#~ print '>> Running on port '	+ str(cport)
-	#~ app.run(host=chost,port=cport)
 
     
 
