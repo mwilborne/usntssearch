@@ -44,6 +44,13 @@ div#container
     width:250px;
 }
 
+.rollingwheel {
+	width: 450px;
+	margin: 0px auto;
+	padding: 0px;
+	text-align: center;
+}
+
 .message{
    display:block;
 	font: 14px 'Lucida Sans Unicode', 'Lucida Grande', Sans-Serif;
@@ -51,14 +58,22 @@ div#container
 	color: #039;
  
 }
+
 .bottomcenter{
-   display:block;
 	font: 8px 'Lucida Sans Unicode', 'Lucida Grande', Sans-Serif;
-    position:absolute;
+	text-align: center;	
 	color: #039;
-    right: 50%
+	width: 450px;
+	margin: 5px auto;
 }
 
+.providerlist{
+	font: 12px bold 'Lucida Sans Unicode', 'Lucida Grande', Sans-Serif;
+	text-align: center;	
+	color: #039;
+	width: 450px;
+	margin: 5px auto;
+}
 .topright_tight{
     display:block;
 	font: bold 14px 'Lucida Sans Unicode', 'Lucida Grande', Sans-Serif;
@@ -71,9 +86,11 @@ div#container
 }
 
 .titlemain {
-	width: 387px;
+	width: 450px;
 	margin: 0px auto;
 	padding: 0px;
+	text-align: center;
+
 }
 
 .form-wrapper-01 {
@@ -279,11 +296,7 @@ div#container
 	padding: 8px 35px 8px 14px;
 	color: #ffffff;
 	text-shadow: none;
-	background-color: #74b7c0;
-	border: 0px solid #8bc53e;
-	-webkit-border-radius: 0px;
-	 -moz-border-radius: 0px;
-		  border-radius: 0px;
+	background-color: #a2bcc0;
 	text-align: center;
 	width: 420px;
 	margin: 10px auto;
@@ -292,12 +305,6 @@ div#container
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
 	border-radius: 10px;
-	
-	a:link {color:#ffffff;}      /* unvisited link */
-	a:visited {color:#ffffff;}  /* visited link */
-	a:hover {color:#ffffff;}  /* mouse over link */
-	a:active {color:#ffffff;}  /* selected link */
-
 }
  
 

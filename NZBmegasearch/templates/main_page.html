@@ -8,16 +8,25 @@
 	</head>
 	<body>
 		<div id="container">
-			<span id="loader" style="visibility:hidden;"><img src="static/loadingicon.gif" width="75" height="75" /></span>
 			<div class="alert-info">
-			Experimental service. Server will be switched off 02.15. <br>
+			This is an experimental service. <br>
 			<a href='https://nzbx.co/' style="color:#ffffff;">* Please, donate to nzbx.co for the new hosting *</a> 
 			</div>
-
-			<div  class="titlemain"><img src="static/title.png" width="387" height="45" /></div>
+			<div id="loader" class="titlemain" style="visibility:hidden;"> <img src="static/loadingicon.gif" width="32" height="32" /></div>
+			<div  class="titlemain"><img src="static/title.png" width="387" height="45" /> 	</div>
+			
 			<form action="/s" method="get" class="form-wrapper-01">
 				<input type="text" id="search" placeholder="Enter your keyword" name="q"><input type="submit" value="Search" id="submit" onclick="show_loader()">
 			</form>
+			<div class="providerlist"> 
+					<img src="static/nzbx.jpg" height="16"/>
+					<img src="static/findnzb.jpg" height="16"/>
+					<img src="static/nzbcc.jpg" height="16"/>
+					<img src="static/fanzub.jpg" height="16"/>
+					<img src="static/ftd.jpg" height="16"/>
+					<img src="static/bacon.jpg" height="16"/>
+					<img src="static/nzbfinder.jpg" height="16"/>		</div>
+					
 			{% if results -%}
 			<table id="results" summary="Search Results">
 				<thead>
@@ -60,8 +69,9 @@
 			{%- endif %}
 						
 		</div>
-		<div class="topright_tight"><a href='https://nzbx.co/dmca'>DCMA</a></div>
-		<div class="bottomcenter">ver. {{ vr['curver'] }} -- 0byte</div>
+		<div class="topright_tight"><a href='https://nzbx.co/dmca'>DMCA</a></div>
+		
+		<div class="bottomcenter">ver. {{ vr['curver'] }} -- 0byte <br/></div>
 
 		<!-- Start of StatCounter Code for Default Guide -->
 		<script type="text/javascript">
