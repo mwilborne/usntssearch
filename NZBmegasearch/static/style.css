@@ -35,7 +35,7 @@ div#container
  /*this is what we want the div to look like*/
 .topright{
     display:block;
-	font: bold 14px 'Lucida Sans Unicode', 'Lucida Grande', Sans-Serif;
+	font: bold 12px 'Lucida Sans Unicode', 'Lucida Grande', Sans-Serif;
 
     /*set the div in the top right corner*/
     position:absolute;
@@ -82,9 +82,25 @@ div#container
     position:absolute;
     top:0;
     right:0;
-    width:80px;
+    width:150px;
 }
 
+.headers_singleparagraph{
+	font-size: 28px;
+	margin: 45px auto;
+	font-family:bold  "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	color: #039;
+}
+
+
+.singleparagraph{
+	font-size: 14px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	color: #039;
+    margin: 45px auto;
+	width: 90%;
+	text-align: left;
+}
 .titlemain {
 	width: 450px;
 	margin: 0px auto;

@@ -20,6 +20,9 @@ from flask import request, Response
 import SearchModule
 import megasearch
 import config_settings
+from ApiModule import ApiResponses
+import miscdefs
+
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 app = Flask(__name__)
@@ -29,7 +32,7 @@ cfg,cgen = config_settings.read_conf()
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 #~ versioning check
 ver_notify= { 'chk':0, 
-			  'curver': '0.24exp'}
+			  'curver': '0.25exp'}
 
 print '~*~ ~*~ NZBMegasearcH (v. '+ str(ver_notify['curver']) + ') ~*~ ~*~'
 	
@@ -42,7 +45,19 @@ def search():
 @app.route('/', methods=['GET','POST'])
 def main_index():
 	return megasearch.dosearch('', cfg, ver_notify)
+
+
+@app.route('/api', methods=['GET'])
+def api():
+	#~ print request.args
+	api = ApiResponses(cfg, ver_notify)
+	return api.dosearch(request.args)
+
+@app.route('/connect', methods=['GET'])
+def connect():
+	return miscdefs.connectinfo()
  
+  
 @app.errorhandler(404)
 def generic_error(error):
 	return main_index()
