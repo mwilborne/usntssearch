@@ -58,6 +58,7 @@ def summary_results(rawResults,strsearch):
 	#~ sanitize
 	for provid in xrange(len(rawResults)):
 		for i in xrange(len(rawResults[provid])):
+			#~ print rawResults[provid][i]['providertitle']
 			rawResults[provid][i]['title'] = sanitize_html(rawResults[provid][i]['title'])
 
 	#~ all in one array

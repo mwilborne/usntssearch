@@ -32,7 +32,7 @@ cfg,cgen = config_settings.read_conf()
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 #~ versioning check
 ver_notify= { 'chk':0, 
-			  'curver': '0.25exp'}
+			  'curver': '0.251exp'}
 
 print '~*~ ~*~ NZBMegasearcH (v. '+ str(ver_notify['curver']) + ') ~*~ ~*~'
 	
@@ -61,11 +61,3 @@ def connect():
 @app.errorhandler(404)
 def generic_error(error):
 	return main_index()
-
-
-if __name__ == "__main__":	
-	if( ver_notify['chk'] == -1):
-		ver_notify['chk'] = miscdefs.chk(ver_notify['curver'])
-
-    
-
