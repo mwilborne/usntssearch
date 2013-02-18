@@ -1,5 +1,5 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
-#~ This file is part of NZBmegasearch by pillone.
+#~ This file is part of NZBmegasearch by 0byte.
 #~ 
 #~ NZBmegasearch is free software: you can redistribute it and/or modify
 #~ it under the terms of the GNU General Public License as published by
@@ -25,9 +25,11 @@ from flask import render_template
 
 import SearchModule
 
- 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
+def legal():
+	return render_template('legal.html')
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+	
 def dosearch(args, cfg, ver_notify):
 	if(len(args)):
 		results = SearchModule.performSearch(args['q'], cfg )
@@ -35,30 +37,58 @@ def dosearch(args, cfg, ver_notify):
 		return cleanUpResults(results, ver_notify, args)
 	else:
 		return render_template('main_page.html', vr=ver_notify )
-		
+		 
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
-
-def sanitize_html(value):
-	if(len(value)):
-		value = value.replace("<\/b>", "")
-		value = value.replace("<b>", "")
-		value = value.replace("&quot;", "")	
-	return value
-
-
-#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
 def summary_results(rawResults,strsearch):
+
 	results =[]
 	titles = []
 	sptitle_collection =[]
 
+	#~ all in one array
+	for provid in xrange(len(rawResults)):
+		for z in xrange(len(rawResults[provid])):
+			rawResults[provid][z]['title'] = SearchModule.sanitize_html(rawResults[provid][z]['title'])
+			title = SearchModule.sanitize_strings(rawResults[provid][z]['title'])
+			titles.append(title)
+			sptitle_collection.append(Set(title.split(".")))
+			results.append(rawResults[provid][z])
+			
+	strsearch1 = SearchModule.sanitize_strings(strsearch)
+	strsearch1_collection = Set(strsearch1.split("."))	
+	
+	print 'Sanitized Query: [' + strsearch1 + ']'
+	
+	for z in xrange(len(results)):
+		findone = 0 
+		results[z]['ignore'] = 0			
+		intrs = strsearch1_collection.intersection(sptitle_collection[z])
+		if ( len(intrs) ==  len(strsearch1_collection)):			
+			findone = 1
+		else:
+			results[z]['ignore'] = 1	
+
+		if(findone):
+			#~ print titles[z]
+			for v in xrange(z+1,len(results)):
+				if(titles[z] == titles[v]):
+					sz1 = float(results[z]['size'])
+					sz2 = float(results[v]['size'])
+					if( abs(sz1-sz2) < 5000000):
+						results[z]  ['ignore'] = 1
+
+	return results
+	
+'''	
+def summary_results2(rawResults,strsearch):
+
+	results =[]
+	titles = []
+	sptitle_collection =[]
 	#~ sanitize
 	for provid in xrange(len(rawResults)):
 		for i in xrange(len(rawResults[provid])):
-			#~ print rawResults[provid][i]['providertitle']
 			rawResults[provid][i]['title'] = sanitize_html(rawResults[provid][i]['title'])
 
 	#~ all in one array
@@ -80,6 +110,11 @@ def summary_results(rawResults,strsearch):
 			findone = 1
 		else:
 			results[z]['ignore'] = 1	
+		#~ print findone
+		#~ print strsearch1_collection
+		#~ print sptitle_collection[z]
+		#~ print str(len(intrs)) + " " + str(len(strsearch1_collection))
+		#~ print '========'
 		
 		if(findone):
 			#~ print titles[z]
@@ -89,9 +124,12 @@ def summary_results(rawResults,strsearch):
 					sz2 = float(results[v]['size'])
 					if( abs(sz1-sz2) < 5000000):
 						results[z]  ['ignore'] = 1
+
+	#~ no sort
+	#~ results = sorted(results, key=itemgetter('posting_date_timestamp'), reverse=True) 
 					
 	return results
-
+'''
  
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -142,3 +180,12 @@ def cleanUpResults(results, ver_notify, args):
 		})
 
 	return render_template('main_page.html',results=niceResults, exist=existduplicates, vr=ver_notify, args=args )
+
+#~ debug
+if __name__ == "__main__":
+	print 'Save to file'
+	webbuf_ret = dosearch('Hotel.Impossible.S01E01')
+	myFile = open('results.html', 'w')
+	myFile.write(webbuf_ret)
+	myFile.close()
+
