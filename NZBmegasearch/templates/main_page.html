@@ -10,6 +10,7 @@
 		<div id="container">
 			<div class="alert-info">
 			We crawl popular NZB indices<br>
+			This is a beta. Have patience. <br>
 			<a href='https://nzbx.co/' style="color:#ffffff;">* Donate to nzbx.co*</a> 
 			</div>
 			<div id="loader" class="titlemain" style="visibility:hidden;"> <img src="static/loadingicon.gif" width="32" height="32" /></div>
@@ -18,14 +19,7 @@
 			<form action="/s" method="get" class="form-wrapper-01">
 				<input type="text" id="search" placeholder="Enter your keyword" name="q"><input type="submit" value="Search" id="submit" onclick="show_loader()">
 			</form>
-			<div class="providerlist"> 
-					<img src="static/nzbx.jpg" height="16"/>
-					<img src="static/findnzb.jpg" height="16"/>
-					<img src="static/nzbcc.jpg" height="16"/>
-					<img src="static/fanzub.jpg" height="16"/>
-					<img src="static/ftd.jpg" height="16"/>
-					<img src="static/bacon.jpg" height="16"/>
-					<img src="static/nzbfinder.jpg" height="16"/>		</div>
+			<div class="providerlist">  13 NZB indeces are searched each time you hit the button :)	</div>
 					
 			{% if results -%}
 			<table id="results" summary="Search Results">
