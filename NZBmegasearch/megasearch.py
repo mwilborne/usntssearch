@@ -57,8 +57,7 @@ def summary_results(rawResults,strsearch):
 			
 	strsearch1 = SearchModule.sanitize_strings(strsearch)
 	strsearch1_collection = Set(strsearch1.split("."))	
-	
-	print 'Sanitized Query: [' + strsearch1 + ']'
+	print datetime.datetime.now().strftime("%Y-%m-%d %H:%M ") + ' [' + strsearch1 + ']'+ ' [' + strsearch + ']'
 	
 	for z in xrange(len(results)):
 		findone = 0 
@@ -80,56 +79,7 @@ def summary_results(rawResults,strsearch):
 
 	return results
 	
-'''	
-def summary_results2(rawResults,strsearch):
-
-	results =[]
-	titles = []
-	sptitle_collection =[]
-	#~ sanitize
-	for provid in xrange(len(rawResults)):
-		for i in xrange(len(rawResults[provid])):
-			rawResults[provid][i]['title'] = sanitize_html(rawResults[provid][i]['title'])
-
-	#~ all in one array
-	for provid in xrange(len(rawResults)):
-		for z in xrange(len(rawResults[provid])):
-			title = rawResults[provid][z]['title'].lower().replace(" ", ".")
-			titles.append(title)
-			sptitle_collection.append(Set(title.split(".")))
-			results.append(rawResults[provid][z])
-			
-	strsearch1 = strsearch.lower().replace(" ", ".")
-	strsearch1_collection = Set(strsearch1.split("."))	
-
-	for z in xrange(len(results)):
-		findone = 0 
-		results[z]['ignore'] = 0			
-		intrs = strsearch1_collection.intersection(sptitle_collection[z])
-		if ( len(intrs) ==  len(strsearch1_collection)):			
-			findone = 1
-		else:
-			results[z]['ignore'] = 1	
-		#~ print findone
-		#~ print strsearch1_collection
-		#~ print sptitle_collection[z]
-		#~ print str(len(intrs)) + " " + str(len(strsearch1_collection))
-		#~ print '========'
-		
-		if(findone):
-			#~ print titles[z]
-			for v in xrange(z+1,len(results)):
-				if(titles[z] == titles[v]):
-					sz1 = float(results[z]['size'])
-					sz2 = float(results[v]['size'])
-					if( abs(sz1-sz2) < 5000000):
-						results[z]  ['ignore'] = 1
-
-	#~ no sort
-	#~ results = sorted(results, key=itemgetter('posting_date_timestamp'), reverse=True) 
-					
-	return results
-'''
+ 
  
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -137,7 +87,7 @@ def summary_results2(rawResults,strsearch):
 def cleanUpResults(results, ver_notify, args):
 	niceResults = []
 	existduplicates = 0
-	
+	 
 	#~ sorting
 	if 'order' not in args:
 		results = sorted(results, key=itemgetter('posting_date_timestamp'), reverse=True) 
@@ -150,6 +100,8 @@ def cleanUpResults(results, ver_notify, args):
 			results = sorted(results, key=itemgetter('providertitle'))
 		if	(args['order']=='d'):
 			results = sorted(results, key=itemgetter('posting_date_timestamp'), reverse=True) 
+		if	(args['order']=='c'):
+			results = sorted(results, key=itemgetter('categ'), reverse=True) 
 			
 	#~ do nice 
 	for i in xrange(len(results)):
@@ -168,12 +120,24 @@ def cleanUpResults(results, ver_notify, args):
 		rd = dateutil.relativedelta.relativedelta(dt2, dt1)
 		#~ approximated date, whatev
 		totdays = rd.years * 365  + rd.months * 31  + rd.days
-		
+		#~ print results[i]['release_comments']
+
+		category_str = '' 
+		keynum = len(results[i]['categ'])
+		keycount = 0
+		for key in results[i]['categ'].keys():
+			category_str = category_str + key
+			keycount = keycount + 1
+			if (keycount < 	keynum):
+			 	 category_str =  category_str + ' - ' 
+
 		niceResults.append({
 			'url':results[i]['url'],
 			'title':results[i]['title'],
 			'filesize':str(round(szf,1)) + mgsz,
+			'cat' : category_str,
 			'age':totdays,
+			'details':results[i]['release_comments'],
 			'providerurl':results[i]['provider'],
 			'providertitle':results[i]['providertitle'],
 			'ignore' : results[i]['ignore']
