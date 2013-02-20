@@ -24,7 +24,7 @@ import xml.etree.cElementTree as ET
 import os
 import copy
 import threading
-
+import re
 	
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 	
@@ -113,13 +113,14 @@ def performSearch(queryString,  cfg):
 
 def sanitize_html(value):
 	if(len(value)):		
-		value = value.lower().replace("<\/b>", "").replace("<b>", "").replace("&quot;", "").replace("&lt;", "").replace("&gt;", "")
+		value = value.replace("<\/b>", "").replace("<b>", "").replace("&quot;", "").replace("&lt;", "").replace("&gt;", "")
 	return value
 		
 def sanitize_strings(value):
 	if(len(value)):
-		value = sanitize_html(value)
-		value = value.replace(".", " ").replace("'", "").replace("-", " ").replace(":", " ").replace('"', " ").replace('(', " ").replace(')', ' ').replace('-', ' ').replace('*', ' ').replace('&', ' ').replace(';', ' ')
+		value = sanitize_html(value).lower()
+		#~ value = value.replace(".", " ").replace("'", "").replace("-", " ").replace(":", " ").replace('"', " ").replace('(', " ").replace(')', ' ').replace('-', ' ').replace('*', ' ').replace('&', ' ').replace(';', ' ').replace('!', ' ')
+		value = re.compile("[^A-Za-z0-99]").sub(" ",value)
 		value = " ".join(value.split()).replace(" ", ".") 
 		#~ print value
 	return value
@@ -189,6 +190,8 @@ class SearchModule(object):
 
 		#~ successful parsing
 		for elem in tree.iter('item'):
+			category_found= {}
+
 			elem_title = elem.find("title")
 			elem_url = elem.find("enclosure")
 			elem_pubdate = elem.find("pubDate")
@@ -197,12 +200,26 @@ class SearchModule(object):
 			#~ removes gmt shift
 			elem_postdate =  time.mktime(datetime.datetime.strptime(elem_pubdate.text[0:len_elem_pubdate-6], "%a, %d %b %Y %H:%M:%S").timetuple())
 			elem_poster = ''
-			
+
+			elem_guid = elem.find("guid")
+			release_details = self.baseURL
+			if(elem_guid is not None):
+				release_details = elem_guid.text
 			for attr in elem.iter('newznab_attr'):
 				if('name' in attr.attrib):
 					if (attr.attrib['name'] == 'poster'): 
 						elem_poster = attr.attrib['value']
-
+					if (attr.attrib['name'] == 'category'):
+						val = attr.attrib['value']
+						if(val in self.category_inv):
+							category_found[self.category_inv[val]] = 1
+						#~ print elem_title.text	
+						#~ print val	
+						#~ print category_found
+						#~ print '=========='
+			if(len(category_found) == 0):
+				category_found['N/A'] = 1
+			
 			d1 = { 
 				'title': elem_title.text,
 				'poster': elem_poster,
@@ -211,17 +228,16 @@ class SearchModule(object):
 				'filelist_preview': '',
 				'group': '',
 				'posting_date_timestamp': float(elem_postdate),
-				'release_comments': '',
+				'release_comments': release_details,
+				'categ':category_found,
 				'ignore':0,
 				'provider':self.baseURL,
 				'providertitle':self.name
 			}
-			parsed_data.append(d1)
-		
-		#~ print len(data)
-		#~ print self.name
-		#~ that's dirty
 
+			parsed_data.append(d1)
+			
+		#~ that's dirty but effective
 		if(	len(parsed_data) == 0 and len(data) < 100):
 			limitpos = data.encode('utf-8').find('<error code="500"')
 			if(limitpos != -1):

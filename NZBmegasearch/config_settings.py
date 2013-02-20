@@ -1,5 +1,5 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
-#~ This file is part of NZBmegasearch by pillone.
+#~ This file is part of NZBmegasearch by 0byte.
 #~ 
 #~ NZBmegasearch is free software: you can redistribute it and/or modify
 #~ it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import sys
 import SearchModule
 
 MAX_PROVIDER_NUMBER = 10
-MAX_TIMEOUT = 10
-MAX_APIEXTRAKEYS = 100
+MAX_TIMEOUT = 5
+
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -98,19 +98,11 @@ def read_conf_fn():
 		numserver = cst_parser.get('general', 'numserver')	
 		#~ custom	 NAB
 		for i in xrange(int(numserver)):
-			
-			#~ api_extra = []
-			#~ for j in xrange(int(MAX_APIEXTRAKEYS)):
-				#~ retj = cst_parser.has_option('search_provider%d' % (i+1), 'api_extra%d' % (j+1))
-				#~ if (retj == True):
-					#~ api_extra.append(cst_parser.get('search_provider%d' % (i+1)  , 'api_extra%d' % (j+1)))
-		
 			d1 = {'url': cst_parser.get('search_provider%d' % (i+1)  , 'url'),
 				  'type': cst_parser.get('search_provider%d' % (i+1)  , 'type'),
 				  'api': cst_parser.get('search_provider%d' % (i+1)  , 'api'),
 				  'valid': cst_parser.get('search_provider%d' % (i+1)  , 'valid'),
 				  'timeout':  MAX_TIMEOUT,
-				  #~ 'apixtra': api_extra,
 				  'builtin': 0
 				  }
 			cfg_struct.append(d1)
