@@ -46,6 +46,8 @@ def search():
 def main_index():
 	return megasearch.dosearch('', cfg, ver_notify)
 
+@app.route('/legal', methods=['GET'])
+def legal():
 
 @app.route('/api', methods=['GET'])
 def api():
