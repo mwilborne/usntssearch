@@ -22,6 +22,7 @@ import megasearch
 import config_settings
 from ApiModule import ApiResponses
 import miscdefs
+from flask import render_template
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -38,6 +39,10 @@ print '~*~ ~*~ NZBMegasearcH (v. '+ str(ver_notify['curver']) + ') ~*~ ~*~'
 	
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
+@app.route('/legal')
+def legal():
+	return render_template('legal.html')
+
 @app.route('/s', methods=['GET'])
 def search():
 	return megasearch.dosearch(request.args, cfg, ver_notify)
@@ -45,9 +50,6 @@ def search():
 @app.route('/', methods=['GET','POST'])
 def main_index():
 	return megasearch.dosearch('', cfg, ver_notify)
-
-@app.route('/legal', methods=['GET'])
-def legal():
 
 @app.route('/api', methods=['GET'])
 def api():
