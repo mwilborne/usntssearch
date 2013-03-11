@@ -4,7 +4,7 @@
 #~ NZBmegasearch is free software: you can redistribute it and/or modify
 #~ it under the terms of the GNU General Public License as published by
 #~ the Free Software Foundation, either version 3 of the License, or
-#~ (at your option) any later version. 
+#~ (at your option) any later version.
 #~ 
 #~ NZBmegasearch is distributed in the hope that it will be useful,
 #~ but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,43 +20,65 @@ import sys
 import datetime
 import time
 import config_settings
+import xml.etree.ElementTree
 import xml.etree.cElementTree as ET
 import os
 import copy
 import threading
 import re
-	
+import logging
+import unidecode
+
+log = logging.getLogger(__name__)
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+    
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 	
 def loadSearchModules(moduleDir = None):
 	global loadedModules
-	# Find search modules
 	loadedModules = [];
 	searchModuleNames = [];
 	if moduleDir == None:
-		moduleDir = os.path.join(os.path.dirname(__file__),'SearchModules');
-	print 'Loading modules from: ' + moduleDir
-
+		moduleDir = resource_path('SearchModules/')
+	print '>> Loading modules from: ' + moduleDir
 	for file in os.listdir(moduleDir):
 		if file.endswith('.py') and file != '__init__.py':
 			searchModuleNames.append(file[0:-3])
 	if len(searchModuleNames) == 0:
-		print 'No search modules found.'
+		print '>> No search modules found.'
 		return
 	else:
-		print 'Found ' + str(len(searchModuleNames)) + ' modules'
+		print '>> Found ' + str(len(searchModuleNames)) + ' modules'
 		
 	searchModuleNames = sorted(searchModuleNames)
+	path = list(sys.path)
+	sys.path.insert(0, moduleDir)
+
 	# Import the modules that the user has enabled
-	print 'Importing: ' + ', '.join(searchModuleNames)
+	mssg = '>> Importing: ' + ', '.join(searchModuleNames)
+	print mssg
+	log.info (mssg)
+
 	try:
 		for module in searchModuleNames:
 			importedModules = __import__('SearchModules.' + module)
 	except Exception as e:
-		print 'Failed to import search modules: ' + str(e)
+		mssg = 'Failed to import search modules: ' + str(e)
+		print mssg
+		log.critical (mssg)
 		return
 	
-	print 'instantiating module classes'
+	#~ print 'instantiating module classes'
 	# Instantiate the modules
 	for module in searchModuleNames:
 		try:
@@ -69,7 +91,7 @@ def loadSearchModules(moduleDir = None):
 			loadedModules.append(targetClass())
 		except Exception as e:
 			print 'Error instantiating search module ' + module + ': ' + str(e)
-
+	
 # Perform a search using all available modules
 def performSearch(queryString,  cfg):
 	queryString = queryString.strip()
@@ -113,12 +135,13 @@ def performSearch(queryString,  cfg):
 
 def sanitize_html(value):
 	if(len(value)):		
-		value = value.replace("<\/b>", "").replace("<b>", "").replace("&quot;", "").replace("&lt;", "").replace("&gt;", "")
+		value = value.replace("<\/b>", "").replace("<b>", "").replace("&quot;", "").replace("&lt;", "").replace("&gt;", "").replace("&amp;", "'")
 	return value
 		
 def sanitize_strings(value):
 	if(len(value)):
 		value = sanitize_html(value).lower()
+		#~ value = unidecode.unidecode(sanitize_html(value).lower())
 		#~ value = value.replace(".", " ").replace("'", "").replace("-", " ").replace(":", " ").replace('"', " ").replace('(', " ").replace(')', ' ').replace('-', ' ').replace('*', ' ').replace('&', ' ').replace(';', ' ').replace('!', ' ')
 		value = re.compile("[^A-Za-z0-99]").sub(" ",value)
 		value = " ".join(value.split()).replace(" ", ".") 
@@ -174,7 +197,9 @@ class SearchModule(object):
 			http_result = requests.get(url=self.queryURL, params=urlParams, verify=False, timeout=tout)
 					
 		except Exception as e:
-			print self.queryURL + ' -- ' + str(e)
+			mssg = self.queryURL + ' -- ' + str(e)
+			print mssg
+			log.critical(mssg)
 			#~ error_rlimit = str(e.args[0]).find('Max retries exceeded')
 			#~ print error_rlimit
 			return parsed_data
@@ -241,7 +266,8 @@ class SearchModule(object):
 		if(	len(parsed_data) == 0 and len(data) < 100):
 			limitpos = data.encode('utf-8').find('<error code="500"')
 			if(limitpos != -1):
-				print 'ERROR: Download/Search limit reached ' + self.queryURL
-		
+				mssg = 'ERROR: Download/Search limit reached ' + self.queryURL
+				print mssg
+				log.error (mssg)
 		return parsed_data		
 

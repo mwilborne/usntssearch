@@ -7,7 +7,7 @@
 #~ (at your option) any later version.
 #~ 
 #~ NZBmegasearch is distributed in the hope that it will be useful,
-#~ but WITHOUT ANY WARRANTY; without even the implied warranty of 
+#~ but WITHOUT ANY WARRANTY; without even the implied warranty of
 #~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #~ GNU General Public License for more details.
 #~ 
@@ -16,24 +16,32 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
 
 
-from flask import  Flask, render_template, redirect
+from flask import  Flask, render_template, redirect, send_file, Response
 import requests
+import tempfile
 import megasearch
+import xml.etree.ElementTree
 import xml.etree.cElementTree as ET
 import SearchModule
 import datetime
+import base64
+import urllib2
+import os
+import logging
+
+log = logging.getLogger(__name__)
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 class ApiResponses:
 
 	# Set up class variables
-	def __init__(self, conf, version):
+	def __init__(self, conf, wrp):
 		self.response = []
 		self.cfg= conf
-		self.ver_notify = version
 		self.timeout = conf[0]['timeout']
 		self.serie_string = ''
 		self.typesearch = ''
+		self.wrp = wrp
 		
 	def dosearch(self, arguments):
 		self.args = arguments
@@ -42,17 +50,89 @@ class ApiResponses:
 			typesearch=self.args['t']
 			if (typesearch == 'tvsearch'):
 				response = self.sickbeard_req()
-			#~ COUCHPOTATO is in DEV
-			#~ elif (typesearch == 'movie'):
-				#~ response = self.couchpotato_req()	
-			#~ elif (typesearch == 'get'):				
-				#~ return redirect("http://www.google.com")
+			elif (typesearch == 'movie'):
+				response = self.couchpotato_req()	
+			#~ elif (typesearch == 'music'):
+				#~ response = self.headphones_req()	
+			elif (typesearch == 'get'):	
+				filetosend = self.proxy_NZB_file()
+				return filetosend
 			else:
 				print '>> UNKNOWN REQ -- ignore' 
 				response = render_template('api_error.html')
 		else:
 			response = render_template('api_error.html')
 		return response	
+
+	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+	def headphones_req(self):	
+		print self.args
+		if(self.args.has_key('album') or self.args.has_key('artist')  or self.args.has_key('track')):
+			return self.generate_music_nabresponse()
+		else:	
+			return render_template('api_error.html')
+			
+	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+	def generate_music_nabresponse(self):
+		dstring = []
+		if(self.args.has_key('artist')):
+			dstring.append(SearchModule.sanitize_strings(self.args['artist']))
+		if(self.args.has_key('album')):
+			dstring.append(SearchModule.sanitize_strings(self.args['album']))
+		if(self.args.has_key('track')):
+			dstring.append(SearchModule.sanitize_strings(self.args['track']))
+		if(self.args.has_key('year')):
+			dstring.append(SearchModule.sanitize_strings(self.args['year']))
+			
+		music_search_str = ''	
+		for i in xrange(len(dstring)):
+			if(len(dstring[i]) and i<len(dstring)-1):
+				music_search_str = music_search_str + dstring[i]
+		
+		print music_search_str
+		#~ print movie_search_str
+		self.searchstring = music_search_str
+		self.typesearch = 0
+		#~ compile results				
+		#~ results = SearchModule.performSearch(movie_search_str, self.cfg )		
+		#~ flatten and summarize them
+		#~ cleaned_results = megasearch.summary_results(results,movie_search_str)
+		#~ render XML
+		#~ return self.cleanUpResultsXML(cleaned_results)
+		return 'm'
+	
+	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~		
+		
+	def proxy_NZB_file(self):
+		fullurl = base64.b64decode(self.args['id'])
+		return self.wrp.beam_notenc(fullurl)
+
+		#~ LOCAL VERSION
+		'''
+		response = urllib2.urlopen(fullurl)
+		fcontent = response.read()
+		#~ print fullurl
+		#~ print response.info()
+		
+		f=tempfile.NamedTemporaryFile(delete=False)
+		f.write(fcontent)
+		f.close()	
+		fresponse = send_file(f.name, mimetype='application/x-nzb;', as_attachment=True, 
+						attachment_filename='yourmovie.nzb', add_etags=False, cache_timeout=None, conditional=False)
+		os.remove(f.name)
+		#~ not needed
+		#~ print response.info()
+		#~ brutal but works
+		for i in xrange(len(response.info().headers)):
+			if(response.info().headers[i].find('Content-Encoding')  != -1):
+				fresponse.headers["Content-Encoding"] = 'gzip'
+				break
+		#~ print fresponse.headers
+		return fresponse				
+
+		'''
+		
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 	def couchpotato_req(self):	
@@ -98,12 +178,14 @@ class ApiResponses:
 			http_result = requests.get(url=url_imdb , params=urlParams, verify=False, timeout=self.timeout)
 		except Exception as e:
 			print e
+			log.critical(str(e))
 			return parsed_data
 		
 		try:
 			data = http_result.json()
 		except Exception as e:
 			print e
+			log.critical(str(e))	
 			return parsed_data
 			
 		parsed_data = { 'movietitle': data['title'],
@@ -124,6 +206,7 @@ class ApiResponses:
 			http_result = requests.get(url=url_tvrage, params=urlParams, verify=False, timeout=self.timeout)
 		except Exception as e:
 			print e
+			log.critical(str(e))
 			return parsed_data
 		
 		data = http_result.text
@@ -132,6 +215,7 @@ class ApiResponses:
 			tree = ET.fromstring(data.encode('utf-8'))
 		except Exception as e:
 			print e
+			log.critical(str(e))
 			return parsed_data
 
 		showtitle = tree.find("showname")	
@@ -216,7 +300,8 @@ class ApiResponses:
 				#~ category = self.crude_subcategory_identifier(results[i]['title'])
 				#~ print human_readable_time
 				niceResults.append({
-					'url':results[i]['url'],
+					'url': results[i]['url'],
+					'encodedurl': base64.b64encode(results[i]['url']),
 					'title':results[i]['title'],
 					'filesize':results[i]['size'],
 					'age':human_readable_time,
@@ -233,6 +318,8 @@ class ApiResponses:
 			idbinfo = ''
 			kindofreq = kindofreq + ' SB ' + self.args['rid'] + ' '
 			
-		print kindofreq + self.searchstring + ' ' + str(len(niceResults)) + ' ' +  str(len(results))
+		mssg = kindofreq + self.searchstring + ' ' + str(len(niceResults)) + ' ' +  str(len(results))
+		print mssg
+		log.info (mssg)
 		return render_template('api.html',results=niceResults, num_results=len(niceResults), typeres= self.typesearch, idb = idbinfo)
 	

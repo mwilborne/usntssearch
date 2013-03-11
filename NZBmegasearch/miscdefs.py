@@ -16,13 +16,20 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #
 
 import requests
+import sys
 from functools import wraps
 from flask import Response,request
 import config_settings
 from flask import render_template
+import os
+import subprocess
+import time
+import logging
 
+log = logging.getLogger(__name__)
 
-def legalinfo():
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+def legal():
 	return render_template('legal.html')
 
 
@@ -57,41 +64,63 @@ def requires_auth(f):
     return decorated
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-def chk_current_ver(): 
-	ver_notify= { 'chk':-1, 
-			  'curver': -1}
-	verify_str = '80801102808011028080110280801102'
+		
+class ChkVersion:
 
-	with open('vernum.num') as f:
-		content = f.readlines()
-	vals = content[0].split(' ')
-	if(vals[0] == verify_str):
-		ver_notify['curver'] = float(vals[1])
+	def __init__(self):
+		self.ver_notify = ver_notify= { 'chk':-1, 
+									'curver': -1}
+		self.chk_local_ver()
+		self.ver_notify['chk'] = self.chk_repos_ver()
+	
+	
+	def chk_local_ver(self): 
+		verify_str = '80801102808011028080110280801102'
 
-	return ver_notify
-
-
-def chk(version_here): 
-	verify_str = '80801102808011028080110280801102'
-	url_versioning = 'https://raw.github.com/pillone/usntssearch/master/NZBmegasearch/vernum.num'
-	try:
-		http_result = requests.get(url=url_versioning)
-		#~ print http_result.text
-		vals = http_result.text.split(' ')
-		cur_ver = float(vals[1])
+		with open('vernum.num') as f:
+			content = f.readlines()
+		vals = content[0].split(' ')
 		if(vals[0] == verify_str):
-			print '>> Newest version available is ' + (vals[1])
-		else:
-			return  -1
+			self.ver_notify['curver'] = float(vals[1])
+	
+	def autoupdate(self): 
+		#~ linux only, sorry win users
+		if sys.platform.startswith('linux'):
+			#~ print 'MISCDEFS: THIS LINE HAS TO BE REMOVED BEFORE DEPLOYMENT'
+			mssg = '>> Running autoupdate on Linux platform' 
+			print mssg
+			log.info(mssg)
+			subprocess.call(["git", "fetch"])
+			subprocess.call(["git", "reset", "--hard", "origin/master"])
+			pythonscr = sys.executable
+			os.execl(pythonscr, pythonscr, * sys.argv)
 
-		if(version_here < cur_ver):
-			print '>> A newer version is available. User notification on.'
-			return 1
-		else:
-			if(version_here == cur_ver):
-				print '>> This is the newest version available'
-			return 0	
+	def chk_repos_ver(self): 
+		verify_str = '80801102808011028080110280801102'
+		url_versioning = 'https://raw.github.com/pillone/usntssearch/master/NZBmegasearch/vernum.num'
+		
+		#~ print 'MISCDEFS: TO REMOVE  LINE IN AUTOUPD  BEFORE DEPLOYMENT'
+		try:
+			http_result = requests.get(url=url_versioning, verify=False)
+			#~ print http_result.text
+			vals = http_result.text.split(' ')
+			cur_ver = float(vals[1])
+			if(vals[0] != verify_str):
+				return  -1
 
-	except Exception as e:
-		print e
-		cur_ver = -1
+			if(self.ver_notify['curver'] < cur_ver):
+				print '>> A newer version is available. User notification on.' 
+
+				#~ in case of supported platforms this is never executed, but autoupdated
+				self.autoupdate()
+				return 1
+			else:
+				if(self.ver_notify['curver'] == cur_ver):
+					print '>> This is the newest version available'
+				return 0	
+
+		except Exception as e:
+			mssg = str(e)
+			print mssg
+			log.critical(mssg)
+			return -1

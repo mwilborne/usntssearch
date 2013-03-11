@@ -18,29 +18,48 @@ from sets import Set
 import decimal
 import datetime
 import time
-import dateutil.relativedelta
 from operator import itemgetter
 from urllib2 import urlparse
 from flask import render_template
-
 import SearchModule
+import logging
+import base64
+import re
 
-#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-def legal():
-	return render_template('legal.html')
-#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+log = logging.getLogger(__name__)
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+class DoParallelSearch:
 	
-def dosearch(args, cfg, ver_notify):
-	if(len(args)):
-		results = SearchModule.performSearch(args['q'], cfg )
-		results = summary_results(results,args['q'])
-		return cleanUpResults(results, ver_notify, args)
-	else:
-		return render_template('main_page.html', vr=ver_notify )
-		 
+	# Set up class variables
+	def __init__(self, conf):
+		self.results = []
+		self.cfg = conf
+		self.svalid = 0
+		self.qry_nologic = ''
+		self.logic_items = []
+		for i in xrange(len(self.cfg)):
+			if(self.cfg[i]['valid'] == '1'):
+				self.svalid = self.svalid + 1
+		self.logic_expr = re.compile("(?:^|\s)([-+])(\w+)")
+		
+	def dosearch(self, args):
+		self.logic_items = self.logic_expr.findall(args['q'])
+		self.qry_nologic = self.logic_expr.sub(" ",args['q'])
+		#~ print self.logic_items
+		results = SearchModule.performSearch(self.qry_nologic, self.cfg )
+		self.results = summary_results(results, self.qry_nologic, self.logic_items)
+		
+	def renderit(self,params):
+		return cleanUpResults(self.results, params['sugg'], params['ver'], params['args'], self.svalid, params)
+	
+	def renderit_empty(self,params):	
+		return render_template('main_page.html', vr=params['ver'], nc=self.svalid, sugg = [], 
+								trend_show = params['trend_show'], trend_movie = params['trend_movie'] )
+		
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-def summary_results(rawResults,strsearch):
+def summary_results(rawResults, strsearch, logic_items=[]):
 
 	results =[]
 	titles = []
@@ -57,8 +76,8 @@ def summary_results(rawResults,strsearch):
 			
 	strsearch1 = SearchModule.sanitize_strings(strsearch)
 	strsearch1_collection = Set(strsearch1.split("."))	
-	print datetime.datetime.now().strftime("%Y-%m-%d %H:%M ") + ' [' + strsearch1 + ']'+ ' [' + strsearch + ']'
 	
+	rcount = [0]*2
 	for z in xrange(len(results)):
 		findone = 0 
 		results[z]['ignore'] = 0			
@@ -68,6 +87,11 @@ def summary_results(rawResults,strsearch):
 		else:
 			results[z]['ignore'] = 1	
 
+		#~ print strsearch1_collection
+		#~ print intrs
+		#~ print findone 
+		#~ print '------------------'
+
 		if(findone):
 			#~ print titles[z]
 			for v in xrange(z+1,len(results)):
@@ -76,6 +100,34 @@ def summary_results(rawResults,strsearch):
 					sz2 = float(results[v]['size'])
 					if( abs(sz1-sz2) < 5000000):
 						results[z]  ['ignore'] = 1
+		#~ stats
+		rcount[	results[z]  ['ignore'] ] += 1			
+
+	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+	#~ logic params
+	exclude_coll = Set([])
+	include_coll = Set([])
+	#~ print '*'+logic_items[0][1]+'*'
+	for i in xrange(len(logic_items)):
+		if(logic_items[i][0] == '-'):
+			exclude_coll.add(logic_items[i][1])
+		if(logic_items[i][0] == '+'):
+			include_coll.add(logic_items[i][1])
+	if(len(include_coll)):
+		for z in xrange(len(results)):
+			intrs_i = include_coll.intersection(sptitle_collection[z])
+			if ( len(intrs_i) == 0 ):			
+				results[z]['ignore'] = 2
+	if(len(exclude_coll)):
+		for z in xrange(len(results)):
+			intrs_e = exclude_coll.intersection(sptitle_collection[z])
+			if ( len(intrs_e) > 0 ):			
+				results[z]['ignore'] = 2
+	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+	
+	mssg = '[' + strsearch1 + ']'+ ' [' + strsearch + '] ' + str(rcount[0]) + ' ' + str(rcount[1])
+	print mssg
+	log.info (mssg)
 
 	return results
 	
@@ -84,10 +136,10 @@ def summary_results(rawResults,strsearch):
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 # Generate HTML for the results
-def cleanUpResults(results, ver_notify, args):
+def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 	niceResults = []
 	existduplicates = 0
-	 
+
 	#~ sorting
 	if 'order' not in args:
 		results = sorted(results, key=itemgetter('posting_date_timestamp'), reverse=True) 
@@ -114,14 +166,7 @@ def cleanUpResults(results, ver_notify, args):
 		if (szf > 1000.0): 
 			szf = szf /1000
 			mgsz = ' GB '
-		# Calculate the age of the post
-		dt1 =  datetime.datetime.fromtimestamp(results[i]['posting_date_timestamp'])
-		dt2 =  datetime.datetime.today()
-		rd = dateutil.relativedelta.relativedelta(dt2, dt1)
-		#~ approximated date, whatev
-		totdays = rd.years * 365  + rd.months * 31  + rd.days
-		#~ print results[i]['release_comments']
-
+		totdays = (datetime.datetime.today() - datetime.datetime.fromtimestamp(results[i]['posting_date_timestamp'])).days + 1		
 		category_str = '' 
 		keynum = len(results[i]['categ'])
 		keycount = 0
@@ -133,23 +178,18 @@ def cleanUpResults(results, ver_notify, args):
 
 		niceResults.append({
 			'url':results[i]['url'],
+			'url_encr':'warp?x='+params['wrp'].chash64_encode(results[i]['url']),
 			'title':results[i]['title'],
 			'filesize':str(round(szf,1)) + mgsz,
 			'cat' : category_str,
 			'age':totdays,
 			'details':results[i]['release_comments'],
+			'details_deref':'http://www.derefer.me/?'+results[i]['release_comments'],
 			'providerurl':results[i]['provider'],
 			'providertitle':results[i]['providertitle'],
 			'ignore' : results[i]['ignore']
 		})
 
-	return render_template('main_page.html',results=niceResults, exist=existduplicates, vr=ver_notify, args=args )
-
-#~ debug
-if __name__ == "__main__":
-	print 'Save to file'
-	webbuf_ret = dosearch('Hotel.Impossible.S01E01')
-	myFile = open('results.html', 'w')
-	myFile.write(webbuf_ret)
-	myFile.close()
-
+	return render_template('main_page.html',results=niceResults, exist=existduplicates, 
+											vr=ver_notify, args=args, nc = svalid, sugg = sugg_list,
+											trend_show = params['trend_show'], trend_movie = params['trend_movie'])

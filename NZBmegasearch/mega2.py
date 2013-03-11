@@ -1,10 +1,10 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
-#~ This file is part of NZBmegasearch by pillone.
+#~ This file is part of NZBmegasearch by 0byte.
 #~ 
 #~ NZBmegasearch is free software: you can redistribute it and/or modify
 #~ it under the terms of the GNU General Public License as published by
 #~ the Free Software Foundation, either version 3 of the License, or
-#~ (at your option) any later version.
+#~ (at your option) any later version. 
 #~ 
 #~ NZBmegasearch is distributed in the hope that it will be useful,
 #~ but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,52 +16,132 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
 
 from flask import Flask
-from flask import request, Response
+from flask import request, Response, redirect
+import logging
+import logging.handlers
+import os
+import threading
 import SearchModule
+from ApiModule import ApiResponses
+from SuggestionModule import SuggestionResponses
+from WarperModule import Warper
 import megasearch
 import config_settings
-from ApiModule import ApiResponses
 import miscdefs
-from flask import render_template
+
+DEBUGFLAG = False
+
+motd = '\n\n~*~ ~*~ NZBMegasearcH ~*~ ~*~'
+print motd
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
-app = Flask(__name__)
-SearchModule.loadSearchModules()
+#~ bootstrap datefmt='%Y-%m-%d %H:%M:%S'
 cfg,cgen = config_settings.read_conf()
-
-#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-#~ versioning check
-ver_notify= { 'chk':0, 
-			  'curver': '0.251exp'}
-
-print '~*~ ~*~ NZBMegasearcH (v. '+ str(ver_notify['curver']) + ') ~*~ ~*~'
-	
+logsdir = SearchModule.resource_path('logs/')
+logging.basicConfig(filename=logsdir+'nzbmegasearch.log',level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+log = logging.getLogger(__name__)
+handler = logging.handlers.RotatingFileHandler(logsdir+'nzbmegasearch.log', maxBytes=cgen['log_size'], backupCount=cgen['log_backupcount'])
+log.addHandler(handler)
+log.info(motd)
+templatedir = SearchModule.resource_path('templates')
+app = Flask(__name__, template_folder=templatedir)	
+cver_ver_notify= { 'chk':1, 
+			  'curver': '0.28online' }
+print '>> version: '+ str(cver_ver_notify['curver'])
+SearchModule.loadSearchModules()
+if(DEBUGFLAG):
+	cgen['general_trend'] = 0
+	print 'MEGA2: DEBUGFLAG MUST BE SET TO FALSE BEFORE DEPLOYMENT'
+sugg = SuggestionResponses(cfg, cgen)
+mega_parall = megasearch.DoParallelSearch(cfg)	
+wrp = Warper (cgen)
+apiresp = ApiResponses(cfg, wrp)
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 @app.route('/legal')
+@miscdefs.requires_auth
 def legal():
-	return render_template('legal.html')
+	return (miscdefs.legal())
+	
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 @app.route('/s', methods=['GET'])
+@miscdefs.requires_auth
 def search():
-	return megasearch.dosearch(request.args, cfg, ver_notify)
+	sugg.asktrend_allparallel()	
+	#~ parallel suggestion and search
+	if(DEBUGFLAG == False):
+		t1 = threading.Thread(target=sugg.ask, args=(request.args,) )
+	t2 = threading.Thread(target=mega_parall.dosearch, args=(request.args,)   )
+	if(DEBUGFLAG == False):
+		t1.start()
+	t2.start()
+	if(DEBUGFLAG == False):	
+		t1.join()
+	t2.join()
+
+	params_dosearch = {'args': request.args, 
+						'sugg': sugg.sugg_info, 
+						'configr': cfg,
+						'trend_movie': sugg.movie_trend, 
+						'trend_show': sugg.show_trend, 
+						'ver': cver_ver_notify,
+						'wrp':wrp
+						}
+	return mega_parall.renderit(params_dosearch)
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+@app.route('/config', methods=['GET','POST'])
+@miscdefs.requires_auth
+def config():
+	return config_settings.config_read()
+
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+
+@app.route('/warp', methods=['GET'])
+@miscdefs.requires_auth
+def warpme():
+	return wrp.beam(request.args)
+	#~ return redirect(wrp.beam(request.args))
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 			
 @app.route('/', methods=['GET','POST'])
+@miscdefs.requires_auth
 def main_index():
-	return megasearch.dosearch('', cfg, ver_notify)
+	sugg.asktrend_allparallel()
+	params_dosearch = {'args': '', 
+						'sugg': [], 
+						'trend': [], 
+						'configr': cfg,
+						'trend_movie': sugg.movie_trend, 
+						'trend_show': sugg.show_trend, 
+						'ver': cver_ver_notify}
+	return mega_parall.renderit_empty(params_dosearch)
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 @app.route('/api', methods=['GET'])
 def api():
-	#~ print request.args
-	api = ApiResponses(cfg, ver_notify)
-	return api.dosearch(request.args)
+	print request.args
+	return apiresp.dosearch(request.args)
 
 @app.route('/connect', methods=['GET'])
 def connect():
 	return miscdefs.connectinfo()
  
-  
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~   
+
 @app.errorhandler(404)
 def generic_error(error):
 	return main_index()
+ 
+
+if __name__ == "__main__":	
+	sugg.asktrend_allparallel()
+	chost = '0.0.0.0'
+	cport = int(cgen['portno'])
+	print '>> Running on port '	+ str(cport)
+
+	app.run(host=chost,port=cport, debug = DEBUGFLAG)

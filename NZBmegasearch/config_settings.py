@@ -10,7 +10,7 @@
 #~ but WITHOUT ANY WARRANTY; without even the implied warranty of
 #~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #~ GNU General Public License for more details.
-#~  
+#~ 
 #~ You should have received a copy of the GNU General Public License
 #~ along with NZBmegasearch.  If not, see <http://www.gnu.org/licenses/>.
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
@@ -21,8 +21,6 @@ import sys
 import SearchModule
 
 MAX_PROVIDER_NUMBER = 10
-MAX_TIMEOUT = 4
-
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -90,10 +88,20 @@ def read_conf_fn():
 	portno = parser.get('general', 'port')	
 	gen_user = parser.get('general', 'general_user')	
 	gen_pwd = parser.get('general', 'general_pwd')	
+	gen_trd = parser.get('general', 'trends')	
+	gen_timeout = int(parser.get('general', 'default_timeout'))
+	gen_cacheage = int(parser.get('general', 'max_cache_age'))
+	gen_log_size = int(parser.get('general', 'max_log_size'))
+	gen_log_backupcount = int(parser.get('general', 'max_log_backupcount'))
+	gen_seed_warptable = int(parser.get('general', 'seed_warptable'))
+	co1 = {'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd, 'general_trend' : gen_trd, 
+			'default_timeout' : gen_timeout, 'max_cache_age' : gen_cacheage, 'log_backupcount': gen_log_backupcount, 
+			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable}	
 	
 	#~ chk if exists
 	cst_parser = SafeConfigParser()
 	cst_parser.read('custom_params.ini')
+
 	try:
 		numserver = cst_parser.get('general', 'numserver')	
 		#~ custom	 NAB
@@ -102,7 +110,7 @@ def read_conf_fn():
 				  'type': cst_parser.get('search_provider%d' % (i+1)  , 'type'),
 				  'api': cst_parser.get('search_provider%d' % (i+1)  , 'api'),
 				  'valid': cst_parser.get('search_provider%d' % (i+1)  , 'valid'),
-				  'timeout':  MAX_TIMEOUT,
+				  'timeout':  gen_timeout,
 				  'builtin': 0
 				  }
 			cfg_struct.append(d1)
@@ -114,11 +122,8 @@ def read_conf_fn():
 		if(ret1 == True): 
 			gen_user = cst_parser.get('general', 'general_user')	
 			gen_pwd = cst_parser.get('general', 'general_pwd')	
-		
-		co1 = {'portno': portno, 'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd}
-	
+
 	except Exception:
-		co1 = {'portno': portno, 'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd}
 		return cfg_struct, co1
 	
 	try:
@@ -135,7 +140,7 @@ def read_conf_fn():
 				  'type': cst_parser.get('bi_search_provider%d' % (i+1)  , 'type'),
 				  'login': lgn,
 				  'pwd': pwd,
-				  'timeout':  MAX_TIMEOUT,
+				  'timeout':  gen_timeout,
 				  'builtin': 1}
 			cfg_struct.append(d1)
 	except Exception:
