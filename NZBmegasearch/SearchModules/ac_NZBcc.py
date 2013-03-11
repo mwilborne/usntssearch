@@ -1,6 +1,6 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
-#~ This file is part of NZBmegasearch by 0byte.
-#~   
+#~ This file is part of NZBmegasearch by pillone.
+#~ 
 #~ NZBmegasearch is free software: you can redistribute it and/or modify
 #~ it under the terms of the GNU General Public License as published by
 #~ the Free Software Foundation, either version 3 of the License, or
@@ -61,7 +61,9 @@ class ac_NZBcc(SearchModule):
 			http_result = requests.get(url=self.queryURL, params=urlParams, verify=False, timeout=cfg['timeout'])
 		except Exception as e:
 			print e
+			log.critical(str(e))
 			return []
+			
 		data = http_result.text
 		# Start parsing the text
 		cstart = 0

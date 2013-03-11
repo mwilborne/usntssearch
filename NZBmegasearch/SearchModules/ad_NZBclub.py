@@ -1,6 +1,6 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
-#~ This file is part of NZBmegasearch by 0byte.
-#~   
+#~ This file is part of NZBmegasearch by pillone.
+#~ 
 #~ NZBmegasearch is free software: you can redistribute it and/or modify
 #~ it under the terms of the GNU General Public License as published by
 #~ the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +16,7 @@
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #
 import ConfigParser
 from SearchModule import *
+import urllib
 
 # Search on Newznab
 class ad_NZBclub(SearchModule):
@@ -25,8 +26,8 @@ class ad_NZBclub(SearchModule):
 		# Parse config file		
 		self.name = 'NZBClub'
 		self.typesrch = 'CLB'
-		self.queryURL = 'https://www.nzbclub.com/nzbfeed.aspx'
-		self.baseURL = 'https://www.nzbclub.com'
+		self.queryURL = 'http://www.nzbclub.com/nzbfeed.aspx'
+		self.baseURL = 'http://www.nzbclub.com'
 		self.active = 1
 		self.builtin = 1
 		self.login = 0
@@ -63,4 +64,8 @@ class ad_NZBclub(SearchModule):
             ns= 1	)
          
 		parsed_data = self.parse_xmlsearch(urlParams, cfg['timeout'])	
+		
+		for i in xrange(len(parsed_data)):
+			parsed_data[i]['url'] = urllib.quote(parsed_data[i]['url'], safe='/:' )
+
 		return parsed_data

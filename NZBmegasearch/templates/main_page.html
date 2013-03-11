@@ -3,6 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>NZB MegasearcH</title>
+		<link rel="stylesheet" type="text/css" href="static/reset2.css" />
 		<link rel="stylesheet" type="text/css" href="static/style.css" />
 		<script src="static/overlay.js"></script>
 	</head>
@@ -13,32 +14,96 @@
 			This is a beta. Have patience. <br>
 			</div>
 			<div id="loader" class="titlemain" style="visibility:hidden;"> <img src="static/loadingicon.gif" width="32" height="32" /></div>
-			<div  class="titlemain"><img src="static/title.png" width="387" height="45" /> 	</div>
+			<div  class="titlemain"><img src="static/title.png" width="387" height="" /> 	</div>
 			
 			<form action="/s" method="get" class="form-wrapper-01">
 				<input type="text" id="search" placeholder="Enter your keyword" name="q"><input type="submit" value="Search" id="submit" onclick="show_loader()">
 			</form>
-			<div class="providerlist">  17 NZB indeces are searched each time you hit the button :)	</div>
-					
-			{% if results -%}
+			<div class="providerlist">  {{ nc  }} NZB indeces are searched each time you hit the button :)	</div>
+			<table class ="suggarea_macro">
+				
+				<td style='vertical-align: top;'>
+					<table class ="trend_table"  >
+						<tr>	<TH COLSPAN="2" style="text-align: right;">
+						  <div class='alert-flex'> Movies Trending</div>
+						</TH></tr>	
+						{% if not trend_movie -%}
+							<tr>	
+							<td  class ="suggarea_title"> Not retreived </td>
+							</tr>	
+						{%- endif %}
+						{% for tm in trend_movie -%}
+							<tr>	
+							<td  class ="suggarea_title"> <a href="s?q={{ tm['searchstr'] }}"> {{ tm['prettytxt'] }} </a></td>
+							<td class ="suggarea_imbd"> <a href="{{ tm['imdb_url'] }}"> <img src="static/imdb.png" width="16" height="16" /> </a> </td>
+							</tr>
+						{%- endfor %}
+					</table>			
+				</td>
+
+
+				<td style='vertical-align: top;'>
+					<table class ="trend_table"  >
+						<tr>	<TH COLSPAN="2" style="text-align: right;">
+						<div class='alert-flex'> Shows Trending</div>
+						</TH></tr>	
+						{% if not trend_show -%}
+							<tr>	
+							<td  class ="suggarea_title"> Not retreived </td>
+							</tr>	
+						{%- endif %}
+						{% for ts in trend_show -%}
+							<tr>	
+							<td  class ="suggarea_title"> <a href="s?q={{ ts['searchstr'] }}"> {{ ts['prettytxt'] }} </a></td>
+							<td class ="suggarea_imbd"> <a href="{{ ts['imdb_url'] }}"> <img src="static/imdb.png" width="16" height="16" /> </a> </td>
+							</tr>
+						{%- endfor %}
+					</table>			
+				</td>
+
+				<td style='vertical-align: top;'>
+
+					<table class ="suggarea_table"  >
+						<tr>	<TH COLSPAN="2" style="text-align: right;">
+						<div class='alert-red'>Did you mean ... </div>
+						</TH></tr>	
+						{%  if not sugg -%}
+							<tr>	
+							<td  class ="suggarea_title"> No suggestions </td>
+							</tr>							
+						{%- endif %}
+						{% for sl in sugg -%}
+							<tr>	
+							<td  class ="suggarea_title"> <a href="s?q={{ sl['searchstr'] }}"  style="color:#ff0000;"> {{ sl['prettytxt'] }} </a></td>
+							<td class ="suggarea_imbd"> <a href="{{ sl['imdb_url'] }}"> <img src="static/imdb.png" width="16" height="16" /> </a> </td>
+							</tr>
+						{%- endfor %}
+					</table>			
+
+				</td>
+				
+			</table>			
+
+			{% if results -%}			
+
 			<table id="results" summary="Search Results">
 				<thead>
-					<tr><th scope="col" class=titlecell><a href="s?q={{ args['q'] }}&order=t">Title</a></th>
-					    <th scope="col" class=sizecell><a href="s?q={{ args['q'] }}&order=c">Type</a></th> 
-					    <th scope="col" class=sizecell><a href="s?q={{ args['q'] }}&order=s">Size</a></th> 
-					    <th scope="col" class=datecell><a href="s?q={{ args['q'] }}&order=d">Days</a></th> 
-					    <th scope="col" class=providercell><a href="s?q={{ args['q'] }}&order=p">Comments</a></th>
+					<tr><th scope="col" class=titlecell><a href="s?q={{ args['q'] }}&order=t"><b>Title <img src="static/arrow-down.png" style='vertical-align: middle;'/></b></a></th>
+					    <th scope="col" class=sizecell><a href="s?q={{ args['q'] }}&order=c"><b>Type <img src="static/arrow-down.png" style='vertical-align: middle;'/></b></a></th> 
+					    <th scope="col" class=sizecell><a href="s?q={{ args['q'] }}&order=s"><b>Size <img src="static/arrow-down.png" style='vertical-align: middle;'/></b></a></th> 
+					    <th scope="col" class=datecell><a href="s?q={{ args['q'] }}&order=d"><b>Days <img src="static/arrow-down.png" style='vertical-align: middle;'/></b></a></th> 
+					    <th scope="col" class=providercell><a href="s?q={{ args['q'] }}&order=p"><b>Comments <img src="static/arrow-down.png" style='vertical-align: middle;'/></b></a></th>
 					</tr>
 				</thead>
 				<tbody>
 				{% for row in results -%}
 					{% if row['ignore'] == 0  -%}
 					<tr>
-						<td class="titlecell"><a href= "{{ row['url'] }}">{{ row['title'] }}</a></td>
+						<td class="titlecell"><a href= "{{ row['url_encr'] }}">{{ row['title'] }}</a></td>
 						<td class="sizecell">{{ row['cat'] }}</td>
 						<td class="sizecell">{{ row['filesize'] }}</td>
 						<td class="datecell">{{ row['age'] }}</td>
-						<td class="providercell"> <a href= "{{ row['details'] }}">{{ row['providertitle'] }}</a></td>
+						<td class="providercell"> <a href= "{{ row['details_deref'] }}">{{ row['providertitle'] }}</a></td>
 					</tr>
 					{%- endif %}
 				{%- endfor %}
@@ -50,21 +115,21 @@
 			{% if exist -%}
 			<table id="results" summary="Detected duplicates">
 				<thead>
-					<tr><th scope="col" class=titlecell>Detected duplicates and weak matches</th>
-					    <th scope="col" class=sizecell>Type</a></th> 					
-						<th scope="col" class=sizecell>Size</th> 
-						<th scope="col" class=datecell>Days</th> 
-						<th scope="col" class=providercell>Comments</th></tr>
+					<tr><th scope="col" class=titlecell><b>Detected duplicates and weak matches</b></th>
+					    <th scope="col" class=sizecell><b>Type</b></th> 					
+						<th scope="col" class=sizecell><b>Size</b></th> 
+						<th scope="col" class=datecell><b>Days</b></th> 
+						<th scope="col" class=providercell><b>Comments</b></th></tr>
 				</thead>
 				<tbody>
 				{% for row in results -%}
-					{% if row['ignore']  -%}
+					{% if row['ignore'] == 1  -%}
 					<tr>
-						<td class="titlecell"><a href= "{{ row['url'] }}">{{ row['title'] }}</a></td>
+						<td class="titlecell"><a href= "{{ row['url_encr'] }}">{{ row['title'] }}</a></td>
 						<td class="sizecell">{{ row['cat'] }}</td>						
 						<td class="sizecell">{{ row['filesize'] }}</td>
 						<td class="datecell">{{ row['age'] }}</td>
-						<td class="providercell"> <a href= "{{ row['details'] }}">{{ row['providertitle'] }}</a></td>
+						<td class="providercell"> <a href= "{{ row['details_deref'] }}">{{ row['providertitle'] }}</a></td>
 					</tr>
 					{%- endif %}
 				{%- endfor %}
@@ -73,27 +138,13 @@
 			{%- endif %}
 						
 		</div>
-		<div class="topright_tight"><a href='legal'>[DMCA]</a> <a href= "connect">[Sickbeard]</a></div>
+		<div class="topright_tight">
+			[ <a href='legal'>DMCA</a> ] 
+			[ <a href= "connect"><img src="static/sick_logo.png" width="" height="16" style='vertical-align: bottom;' /><img src="static/cp_logo.png" width="" height="16" /><img src="static/ch_logo.png" width="" height="13" /></a> ] 			</div>		
+		</div>
 	
-		<div class="bottomcenter">ver. {{ vr['curver'] }} -- 0byte <br/></div>
+		<div class="bottomcenter">ver. {{ vr['curver'] }}  <br/></div>
 
-		<!-- Start of StatCounter Code for Default Guide -->
-		<script type="text/javascript">
-		var sc_project=8707188; 
-		var sc_invisible=1; 
-		var sc_security="f3bafd7f"; 
-		var scJsHost = (("https:" == document.location.protocol) ?
-		"https://secure." : "http://www.");
-		document.write("<sc"+"ript type='text/javascript' src='" +
-		scJsHost+
-		"statcounter.com/counter/counter.js'></"+"script>");
-		</script>
-		<noscript><div class="statcounter"><a title="web analytics"
-		href="http://statcounter.com/" target="_blank"><img
-		class="statcounter"
-		src="http://c.statcounter.com/8707188/0/f3bafd7f/1/"
-		alt="web analytics"></a></div></noscript>
-		<!-- End of StatCounter Code for Default Guide -->
 
 	</body>
 </html>
