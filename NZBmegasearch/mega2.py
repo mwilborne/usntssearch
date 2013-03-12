@@ -53,6 +53,8 @@ if(DEBUGFLAG):
 	cgen['general_trend'] = 0
 	print 'MEGA2: DEBUGFLAG MUST BE SET TO FALSE BEFORE DEPLOYMENT'
 sugg = SuggestionResponses(cfg, cgen)
+#~ detached server for trends
+sugg.detached_trendpolling = 1
 mega_parall = megasearch.DoParallelSearch(cfg)	
 wrp = Warper (cgen)
 apiresp = ApiResponses(cfg, wrp)

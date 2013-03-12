@@ -94,9 +94,10 @@ def read_conf_fn():
 	gen_log_size = int(parser.get('general', 'max_log_size'))
 	gen_log_backupcount = int(parser.get('general', 'max_log_backupcount'))
 	gen_seed_warptable = int(parser.get('general', 'seed_warptable'))
+	gen_trends_refreshrate = int(parser.get('general', 'trends_refreshrate'))
 	co1 = {'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd, 'general_trend' : gen_trd, 
 			'default_timeout' : gen_timeout, 'max_cache_age' : gen_cacheage, 'log_backupcount': gen_log_backupcount, 
-			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable}	
+			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable, 'trends_refreshrate':gen_trends_refreshrate}
 	
 	#~ chk if exists
 	cst_parser = SafeConfigParser()

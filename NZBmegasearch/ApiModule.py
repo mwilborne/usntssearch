@@ -42,7 +42,17 @@ class ApiResponses:
 		self.serie_string = ''
 		self.typesearch = ''
 		self.wrp = wrp
-		
+		self.tvrage_rqheaders = {
+								'Connection': 'keep-alive;' ,
+								'Cache-Control': 'max-age=0',
+								'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+								'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.52 Safari/537.17',
+								'Referer': 'http://services.tvrage.com/info.php?page=main',
+								'Accept-Encoding': 'gzip,deflate,sdch',
+								'Accept-Language': 'en-US,en;q=0.8',
+								'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3'
+								 }
+						 		
 	def dosearch(self, arguments):
 		self.args = arguments
 		
@@ -203,7 +213,7 @@ class ApiResponses:
 		urlParams = dict( sid=rid )			
 		#~ loading
 		try:
-			http_result = requests.get(url=url_tvrage, params=urlParams, verify=False, timeout=self.timeout)
+			http_result = requests.get(url=url_tvrage, params=urlParams, verify=False, timeout=self.timeout,  headers=self.tvrage_rqheaders)
 		except Exception as e:
 			print e
 			log.critical(str(e))
