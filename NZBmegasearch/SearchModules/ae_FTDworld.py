@@ -25,7 +25,7 @@ class ae_FTDworld(SearchModule):
 		self.typesrch = 'FTD'
 		self.queryURL = 'http://ftdworld.net/api/index.php'
 		self.baseURL = 'http://ftdworld.net'
-		#~ self.nzbDownloadBaseURL = 'http://ftdworld.net/spotinfo.php?id='
+		self.nzbdetailsBaseURL = 'http://ftdworld.net/spotinfo.php?id='
 		self.nzbDownloadBaseURL = 'http://ftdworld.net/cgi-bin/nzbdown.pl?fileID='
 		self.active = 1
 		self.builtin = 1
@@ -88,7 +88,7 @@ class ae_FTDworld(SearchModule):
 							'group': '',
 							'categ': {'N/A':1},
 							'posting_date_timestamp': int(data[i]['Created']),
-							'release_comments': self.nzbDownloadBaseURL + data[i]['id'],
+							'release_comments': self.nzbdetailsBaseURL + data[i]['id'],
 							'ignore':0,
 							'provider':self.baseURL,
 							'req_pwd':self.typesrch,
