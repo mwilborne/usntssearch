@@ -265,7 +265,7 @@ class ApiResponses:
 		self.typesearch = 1
 		self.searchstring = serie_search_str
 		#~ compile results				
-		results, ignoreck = SearchModule.performSearch(serie_search_str, self.cfg )		
+		results = SearchModule.performSearch(serie_search_str, self.cfg )		
 		#~ flatten and summarize them
 		cleaned_results = megasearch.summary_results(results,serie_search_str)
 		#~ render XML
