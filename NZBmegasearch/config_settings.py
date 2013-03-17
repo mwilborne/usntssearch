@@ -76,12 +76,12 @@ def	write_conf(request_form):
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
-def read_conf(): 
-	cf1, co1 = read_conf_fn()
+def read_conf(forcedcustom=''): 
+	cf1, co1 = read_conf_fn(forcedcustom)
 	return cf1,co1
 
  #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~    
-def read_conf_fn(): 
+def read_conf_fn(forcedcustom=''): 
 	cfg_struct = []
 	parser = SafeConfigParser()
 	parser.read('builtin_params.ini')
@@ -95,13 +95,20 @@ def read_conf_fn():
 	gen_log_backupcount = int(parser.get('general', 'max_log_backupcount'))
 	gen_seed_warptable = int(parser.get('general', 'seed_warptable'))
 	gen_trends_refreshrate = int(parser.get('general', 'trends_refreshrate'))
+	gen_stats_key = parser.get('general', 'stats_key')
 	co1 = {'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd, 'general_trend' : gen_trd, 
 			'default_timeout' : gen_timeout, 'max_cache_age' : gen_cacheage, 'log_backupcount': gen_log_backupcount, 
-			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable, 'trends_refreshrate':gen_trends_refreshrate}
+			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable, 'trends_refreshrate':gen_trends_refreshrate,
+			'stats_key' : gen_stats_key}
 	
 	#~ chk if exists
 	cst_parser = SafeConfigParser()
-	cst_parser.read('custom_params.ini')
+	
+	if(forcedcustom == ''):
+		cst_parser.read('custom_params.ini')
+	else:
+		print 'Forced custom filename: ' + forcedcustom
+		cst_parser.read(forcedcustom)	
 
 	try:
 		numserver = cst_parser.get('general', 'numserver')	

@@ -91,6 +91,8 @@ def loadSearchModules(moduleDir = None):
 			loadedModules.append(targetClass())
 		except Exception as e:
 			print 'Error instantiating search module ' + module + ': ' + str(e)
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 	
 # Perform a search using all available modules
 def performSearch(queryString,  cfg):
@@ -126,7 +128,6 @@ def performSearch(queryString,  cfg):
 
 	for t in threadHandles:
 		t.join()
-	#~ print '=== All Search Threads Finished ==='
 
 	return globalResults
 
@@ -137,12 +138,13 @@ def sanitize_html(value):
 	if(len(value)):		
 		value = value.replace("<\/b>", "").replace("<b>", "").replace("&quot;", "").replace("&lt;", "").replace("&gt;", "").replace("&amp;", "'")
 	return value
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 		
 def sanitize_strings(value):
 	if(len(value)):
 		value = sanitize_html(value).lower()
 		#~ value = unidecode.unidecode(sanitize_html(value).lower())
-		#~ value = value.replace(".", " ").replace("'", "").replace("-", " ").replace(":", " ").replace('"', " ").replace('(', " ").replace(')', ' ').replace('-', ' ').replace('*', ' ').replace('&', ' ').replace(';', ' ').replace('!', ' ')
 		value = re.compile("[^A-Za-z0-99]").sub(" ",value)
 		value = " ".join(value.split()).replace(" ", ".") 
 		#~ print value
@@ -155,6 +157,7 @@ def performSearchThread(queryString, neededModule, lock, cfg):
 	localResults = neededModule.search(queryString, cfg)
 	lock.acquire()
 	globalResults.append(localResults)
+
 	try:
 		lock.release()
 	except Exception as e:
@@ -178,9 +181,11 @@ class SearchModule(object):
 		self.baseURL = ''
 		self.nzbDownloadBaseURL = ''
 		self.apiKey = ''
+
 	# Show the configuration options for this module
 	def configurationHTML(self):
 		return ''
+
 	# Perform a search using the given query string
 	def search(self, queryString):
 		raise NotImplementedException('This scraper does not have a search function.')

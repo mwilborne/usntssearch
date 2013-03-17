@@ -245,7 +245,7 @@ class ApiResponses:
 		self.searchstring = movie_search_str
 		self.typesearch = 0
 		#~ compile results				
-		results = SearchModule.performSearch(movie_search_str, self.cfg )		
+		results, ignoreck = SearchModule.performSearch(movie_search_str, self.cfg )		
 		#~ flatten and summarize them
 		cleaned_results = megasearch.summary_results(results,movie_search_str)
 		#~ render XML
@@ -265,7 +265,7 @@ class ApiResponses:
 		self.typesearch = 1
 		self.searchstring = serie_search_str
 		#~ compile results				
-		results = SearchModule.performSearch(serie_search_str, self.cfg )		
+		results, ignoreck = SearchModule.performSearch(serie_search_str, self.cfg )		
 		#~ flatten and summarize them
 		cleaned_results = megasearch.summary_results(results,serie_search_str)
 		#~ render XML

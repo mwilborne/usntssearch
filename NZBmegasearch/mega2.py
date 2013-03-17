@@ -58,17 +58,22 @@ sugg.detached_trendpolling = 1
 mega_parall = megasearch.DoParallelSearch(cfg)	
 wrp = Warper (cgen)
 apiresp = ApiResponses(cfg, wrp)
+dwn = miscdefs.DownloadedStats()
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
+
+@app.route('/sts_dwnl_gnr')
+def dstastprovide():	
+	return dwn.get(request.args)
+	
+
 @app.route('/legal')
-@miscdefs.requires_auth
 def legal():
 	return (miscdefs.legal())
 	
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 @app.route('/s', methods=['GET'])
-@miscdefs.requires_auth
 def search():
 	sugg.asktrend_allparallel()	
 	#~ parallel suggestion and search
@@ -94,7 +99,6 @@ def search():
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 @app.route('/config', methods=['GET','POST'])
-@miscdefs.requires_auth
 def config():
 	return config_settings.config_read()
 
@@ -102,15 +106,17 @@ def config():
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 @app.route('/warp', methods=['GET'])
-@miscdefs.requires_auth
 def warpme():
-	return wrp.beam(request.args)
-	#~ return redirect(wrp.beam(request.args))
+	res = wrp.beam(request.args)
+	
+	if(res == -1):
+		return main_index()
+	else: 	
+		return res
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 			
 @app.route('/', methods=['GET','POST'])
-@miscdefs.requires_auth
 def main_index():
 	sugg.asktrend_allparallel()
 	params_dosearch = {'args': '', 

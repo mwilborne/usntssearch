@@ -25,27 +25,30 @@ class ae_FTDworld(SearchModule):
 		self.typesrch = 'FTD'
 		self.queryURL = 'http://ftdworld.net/api/index.php'
 		self.baseURL = 'http://ftdworld.net'
-		self.nzbDownloadBaseURL = 'http://ftdworld.net/spotinfo.php?id='
-		#~ self.nzbDownloadBaseURL = 'http://ftdworld.net/cgi-bin/nzbdown.pl?fileID='
+		#~ self.nzbDownloadBaseURL = 'http://ftdworld.net/spotinfo.php?id='
+		self.nzbDownloadBaseURL = 'http://ftdworld.net/cgi-bin/nzbdown.pl?fileID='
 		self.active = 1
 		self.builtin = 1
 		self.login = 0
-		self.cookie=0
 		self.inapi = 0
- 	
-	def dologin(self, cfg):			
+		self.cookie = {}
+		
+	def dologin(self):			
+		cfg = {}
+		cfg['login'] = 'nzbmegasearch'
+		cfg['pwd'] = 'nerradmistav'
+		
 		loginurl='http://ftdworld.net/api/login.php'
 		urlParams = dict(
 			userlogin=cfg['login'],
 			passlogin=cfg['pwd']
 		)
 		try:
-			http_result = requests.post(loginurl, data=urlParams)
+			#~ short timeout
+			http_result = requests.post(loginurl, data=urlParams, timeout=2)
 			data = http_result.json()
 			#~ print data
-			self.cookie = {'name' : 'FTDWSESSID',
-					'val' : http_result.cookies['FTDWSESSID']}
-			print self.cookie
+			self.cookie = {'FTDWSESSID' : http_result.cookies['FTDWSESSID']}
 			return data['goodToGo']
 		except Exception as e:
 			print e
@@ -53,9 +56,6 @@ class ae_FTDworld(SearchModule):
 		
 	# Perform a search using the given query string
 	def search(self, queryString, cfg):
-		#~ rt = self.dologin(cfg)
-		#~ print 'Login success:' + str(rt)
-		
 		# Get JSON
 		urlParams = dict(
 			customQuery='usr',
@@ -91,6 +91,7 @@ class ae_FTDworld(SearchModule):
 							'release_comments': self.nzbDownloadBaseURL + data[i]['id'],
 							'ignore':0,
 							'provider':self.baseURL,
+							'req_pwd':self.typesrch,
 							'providertitle':self.name
 							}
 			parsed_data.append(d1)

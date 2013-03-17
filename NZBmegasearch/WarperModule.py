@@ -15,14 +15,20 @@
 #~ along with NZBmegasearch.  If not, see <http://www.gnu.org/licenses/>.
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
 
-from flask import  Flask, render_template, redirect, Response
+from flask import  Flask, render_template, redirect, Response, send_file
+import tempfile
+import os
 import requests
 import megasearch
 import datetime
 import time
+import urllib2
 import threading
 import logging
 import base64
+import SearchModule
+
+
 from random import shuffle,seed
 
 log = logging.getLogger(__name__)
@@ -117,23 +123,73 @@ class Warper:
 		self.base64scramble_dec['='] = ['=', len(s)+3]
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+	def beam_cookie(self, urltouse, args):
+		retfail = -1
 		
+		global globalResults
+		
+		if 'loadedModules' not in globals():
+			SearchModule.loadSearchModules()
+		
+		cookie = {}
+		for module in SearchModule.loadedModules:
+			if( module.typesrch == args['m']):
+				if(module.dologin() == True):
+					cookie =  module.cookie
+				else: 
+					return retfail
+				
+ 		try:
+			opener = urllib2.build_opener()
+			opener.addheaders.append(('Cookie', 'FTDWSESSID='+cookie['FTDWSESSID']))
+			response = opener.open(urltouse)
+
+		except Exception as e:
+			return retfail
+ 		
+		fcontent = response.read()
+		#~ print response.info()
+		f=tempfile.NamedTemporaryFile(delete=False)
+		f.write(fcontent)
+		f.close()	
+		fresponse = send_file(f.name, mimetype='application/x-nzb;', as_attachment=True, 
+						attachment_filename='yourmovie.nzb', add_etags=False, cache_timeout=None, conditional=False)
+		os.remove(f.name)
+		
+		for i in xrange(len(response.info().headers)):
+			if(response.info().headers[i].find('Content-Encoding')  != -1):
+				fresponse.headers["Content-Encoding"] = 'gzip'
+				break
+		fresponse.headers['Content-Disposition'] = response.headers['Content-Disposition']
+		return fresponse	
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+				
 	def beam_notenc(self, urltouse):
 
 		response = Response('Hey there!')
 		response.headers['X-Accel-Redirect'] = '/warpme/'+urltouse
 		response.headers['Content-Type'] = 'application/x-nzb;'
+		
 		return response
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 		
 	def beam(self, arguments):
-		#~ print arguments
-		response = Response('Hey there!')
 
+		#~ manual proxing 
+		if('m' in arguments and 'x' in arguments):
+			decodedurl = self.chash64_decode(arguments['x'])
+			response = self.beam_cookie(decodedurl, arguments)
+			log.info ('WARPNGX: ' + decodedurl + ' --> manual cookie')	
+			return response				
+
+		#~ turbo nginxproxing 	
 		if('x' in arguments):
 			decodedurl = self.chash64_decode(arguments['x'])
 			response = self.beam_notenc(decodedurl)
 			log.info ('WARPNGX: ' + decodedurl + ' --> ' + response.headers['X-Accel-Redirect'])	
-		return response	
+			print response.headers['X-Accel-Redirect']
+			return response	
 	

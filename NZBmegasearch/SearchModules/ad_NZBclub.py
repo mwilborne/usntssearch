@@ -110,6 +110,7 @@ class ad_NZBclub(SearchModule):
 			elem_poster = ''
 
 			elem_lnk = elem.find("link")
+			release_details = self.baseURL
 			if(elem_lnk is not None):
 				release_details = elem_lnk.text
 			for attr in elem.iter('newznab_attr'):

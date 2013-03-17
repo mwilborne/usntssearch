@@ -20,7 +20,7 @@ import datetime
 import time
 from operator import itemgetter
 from urllib2 import urlparse
-from flask import render_template
+from flask import render_template, Response
 import SearchModule
 import logging
 import base64
@@ -175,10 +175,12 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 			keycount = keycount + 1
 			if (keycount < 	keynum):
 			 	 category_str =  category_str + ' - ' 
-
+		qryforwarp=params['wrp'].chash64_encode(results[i]['url'])
+		if('req_pwd' in results[i]):
+			qryforwarp += '&m='+ results[i]['req_pwd']
 		niceResults.append({
 			'url':results[i]['url'],
-			'url_encr':'warp?x='+params['wrp'].chash64_encode(results[i]['url']),
+			'url_encr':'warp?x='+qryforwarp,
 			'title':results[i]['title'],
 			'filesize':str(round(szf,1)) + mgsz,
 			'cat' : category_str,
