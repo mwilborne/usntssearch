@@ -116,8 +116,8 @@ class Warper:
 		self.base64scramble_enc['+'] = ['+', len(s)+1]
 		self.base64scramble_dec['+'] = ['+', len(s)+1]
 
-		self.base64scramble_enc['/'] = ['/', len(s)+2]
-		self.base64scramble_dec['/'] = ['/', len(s)+2]
+		self.base64scramble_enc['/'] = ['-', len(s)+2]
+		self.base64scramble_dec['-'] = ['/', len(s)+2]
 
 		self.base64scramble_enc['='] = ['=', len(s)+3]
 		self.base64scramble_dec['='] = ['=', len(s)+3]

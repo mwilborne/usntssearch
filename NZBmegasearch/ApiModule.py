@@ -115,8 +115,14 @@ class ApiResponses:
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~		
 		
 	def proxy_NZB_file(self):
-		fullurl = base64.b64decode(self.args['id'])
-		return self.wrp.beam_notenc(fullurl)
+		#~ fullurl = self.wrp.chash64_decode(self.args['id'])
+		#~ print fullurl
+		arguments={}
+		arguments['x'] = self.args['id']
+		print self.args
+		if('m' in self.args):
+			arguments['m'] = self.args['m']
+		return self.wrp.beam(arguments)
 
 		#~ LOCAL VERSION
 		'''
@@ -152,7 +158,7 @@ class ApiResponses:
 			#~ request imdb
 			#~ http://deanclatworthy.com/imdb/?id=tt1673434
 			#~ http://imdbapi.org/?id=tt1673434
-			imdb_show = self.imdb_movieinfo(self.args['imdbid'])	
+			imdb_show = self.imdb_movieinfo(self.args['imdbid'])
 			if(len(imdb_show['movietitle'])): 
 				return self.generate_movie_nabresponse(imdb_show)
 			else:
@@ -197,7 +203,11 @@ class ApiResponses:
 			print e
 			log.critical(str(e))	
 			return parsed_data
-			
+		#~ print data 	
+		
+		if('error' in data):
+			return parsed_data
+		
 		parsed_data = { 'movietitle': data['title'],
 						'year': str(data['year'])}
 		#~ print parsed_data
@@ -309,7 +319,7 @@ class ApiResponses:
 				if('req_pwd' in results[i]):
 					qryforwarp += '&m='+ results[i]['req_pwd']
 
-				
+				#~ print qryforwarp
 				dt1 =  datetime.datetime.fromtimestamp(int(results[i]['posting_date_timestamp']))
 				human_readable_time = dt1.strftime("%a, %d %b %Y %H:%M:%S")
 				#~ nobody parses it
