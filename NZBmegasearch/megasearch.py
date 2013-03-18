@@ -180,7 +180,7 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 			qryforwarp += '&m='+ results[i]['req_pwd']
 		niceResults.append({
 			'url':results[i]['url'],
-			'url_encr':'warp?x='+qryforwarp,
+			'url_encr':'warp?x='+qryforwarp+'&y=1',
 			'title':results[i]['title'],
 			'filesize':str(round(szf,1)) + mgsz,
 			'cat' : category_str,
