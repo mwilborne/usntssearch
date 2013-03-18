@@ -187,6 +187,7 @@ class Warper:
 
 		#~ turbo nginxproxing 	
 		if('x' in arguments):
+			log.info ('RAWBEFORE: '+str(arguments['x']))
 			decodedurl = self.chash64_decode(arguments['x'])
 			#~ print decodedurl
 			response = self.beam_notenc(decodedurl)
