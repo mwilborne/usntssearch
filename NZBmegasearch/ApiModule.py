@@ -245,7 +245,7 @@ class ApiResponses:
 		self.searchstring = movie_search_str
 		self.typesearch = 0
 		#~ compile results				
-		results, ignoreck = SearchModule.performSearch(movie_search_str, self.cfg )		
+		results = SearchModule.performSearch(movie_search_str, self.cfg )		
 		#~ flatten and summarize them
 		cleaned_results = megasearch.summary_results(results,movie_search_str)
 		#~ render XML
@@ -301,9 +301,15 @@ class ApiResponses:
 	# Generate XML for the results
 	def cleanUpResultsXML(self, results):
 		niceResults = []
+			
 		#~ no sorting
 		for i in xrange(len(results)):
 			if(results[i]['ignore'] == 0):
+				qryforwarp=self.wrp.chash64_encode(results[i]['url'])
+				if('req_pwd' in results[i]):
+					qryforwarp += '&m='+ results[i]['req_pwd']
+
+				
 				dt1 =  datetime.datetime.fromtimestamp(int(results[i]['posting_date_timestamp']))
 				human_readable_time = dt1.strftime("%a, %d %b %Y %H:%M:%S")
 				#~ nobody parses it
@@ -311,7 +317,7 @@ class ApiResponses:
 				#~ print human_readable_time
 				niceResults.append({
 					'url': results[i]['url'],
-					'encodedurl': base64.b64encode(results[i]['url']),
+					'encodedurl': qryforwarp,
 					'title':results[i]['title'],
 					'filesize':results[i]['size'],
 					'age':human_readable_time,

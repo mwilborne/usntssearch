@@ -188,8 +188,11 @@ class Warper:
 		#~ turbo nginxproxing 	
 		if('x' in arguments):
 			decodedurl = self.chash64_decode(arguments['x'])
+			#~ print decodedurl
 			response = self.beam_notenc(decodedurl)
+			log.info ('RAWNGX: '+arguments['x'])
 			log.info ('WARPNGX: ' + decodedurl + ' --> ' + response.headers['X-Accel-Redirect'])	
-			print response.headers['X-Accel-Redirect']
+			#~ print response.headers['X-Accel-Redirect']
+			
 			return response	
 	
