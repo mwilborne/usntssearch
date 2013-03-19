@@ -184,7 +184,7 @@ class Warper:
 		if('m' in arguments and 'x' in arguments):
 			decodedurl = self.chash64_decode(arguments['x'])
 			response = self.beam_cookie(decodedurl, arguments)
-			log.info ('WARPNGX: ' + decodedurl + ' --> manual cookie')	
+			log.info ('WARPNGM: ' + decodedurl + ' --> manual cookie')	
 			return response				
 
 		#~ turbo nginxproxing 	
