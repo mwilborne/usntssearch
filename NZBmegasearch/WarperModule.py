@@ -19,6 +19,7 @@ from flask import  Flask, render_template, redirect, Response, send_file
 import tempfile
 import os
 import requests
+import string
 import megasearch
 import datetime
 import time
@@ -191,8 +192,13 @@ class Warper:
 		if('x' in arguments):
 			decodedurl = self.chash64_decode(arguments['x'])
 			if(len(decodedurl) == 0):
-				log.info('MALFORMEDURL: ' + arguments['x'])
+				log.info('MALFORMEDURL_UNKCHAR: ' + arguments['x'])
 				return -1				
+			rprnt = all(c in string.printable for c in decodedurl)
+			if (rprnt == False):
+				log.info('MALFORMEDURL_UNPRINT: ' + arguments['x'])
+				return -1		
+				
 			response = self.beam_notenc(decodedurl)
 			if('y' in arguments):
 				log.info ('RAWNGXY: '+str(arguments['x'])+'--y='+str(arguments['y']))
