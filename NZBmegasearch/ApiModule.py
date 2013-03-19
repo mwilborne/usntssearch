@@ -315,6 +315,9 @@ class ApiResponses:
 		#~ no sorting
 		for i in xrange(len(results)):
 			if(results[i]['ignore'] == 0):
+				if (results[i]['url'] is None):
+					results[i]['url'] = ""
+
 				qryforwarp=self.wrp.chash64_encode(results[i]['url'])
 				if('req_pwd' in results[i]):
 					qryforwarp += '&m='+ results[i]['req_pwd']
@@ -322,8 +325,6 @@ class ApiResponses:
 				#~ print qryforwarp
 				dt1 =  datetime.datetime.fromtimestamp(int(results[i]['posting_date_timestamp']))
 				human_readable_time = dt1.strftime("%a, %d %b %Y %H:%M:%S")
-				#~ nobody parses it
-				#~ category = self.crude_subcategory_identifier(results[i]['title'])
 				#~ print human_readable_time
 				niceResults.append({
 					'url': results[i]['url'],

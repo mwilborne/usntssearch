@@ -175,6 +175,9 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 			keycount = keycount + 1
 			if (keycount < 	keynum):
 			 	 category_str =  category_str + ' - ' 
+		if (results[i]['url'] is None):
+			results[i]['url'] = ""
+		
 		qryforwarp=params['wrp'].chash64_encode(results[i]['url'])
 		if('req_pwd' in results[i]):
 			qryforwarp += '&m='+ results[i]['req_pwd']

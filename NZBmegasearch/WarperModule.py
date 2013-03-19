@@ -83,8 +83,8 @@ class Warper:
 		return dec_str_b64
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-	def chash64_encode(self, str):
-		enc_str_b64 = base64.b64encode(str)
+	def chash64_encode(self, strstr):
+		enc_str_b64 = base64.b64encode(strstr)
 		nstr = ''
 		for i in xrange(len(enc_str_b64)):
 			nstr += self.base64scramble_enc[ enc_str_b64[i] ] [0]
