@@ -72,6 +72,8 @@ class Warper:
 	def chash64_decode(self, enc_str):
 		nstr = ''
 		for i in xrange(len(enc_str)):
+			if(enc_str[i] not in self.base64scramble_dec):
+				return ''
 			nstr += self.base64scramble_dec[ enc_str[i] ] [0]
 		dec_str_b64 = base64.b64decode(nstr)
 		#~ print 	enc_str
@@ -187,9 +189,10 @@ class Warper:
 
 		#~ turbo nginxproxing 	
 		if('x' in arguments):
-			log.info ('RAWBEFORE: '+str(arguments['x']))
 			decodedurl = self.chash64_decode(arguments['x'])
-			#~ print decodedurl
+			if(len(decodedurl) == 0):
+				log.info('MALFORMEDURL: ' + arguments['x'])
+				return -1				
 			response = self.beam_notenc(decodedurl)
 			if('y' in arguments):
 				log.info ('RAWNGXY: '+str(arguments['x'])+'--y='+str(arguments['y']))
