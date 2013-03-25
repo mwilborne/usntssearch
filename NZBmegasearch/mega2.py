@@ -46,7 +46,7 @@ log.info(motd)
 templatedir = SearchModule.resource_path('templates')
 app = Flask(__name__, template_folder=templatedir)	
 cver_ver_notify= { 'chk':1, 
-			  'curver': '0.28online' }
+			  'curver': '--' }
 print '>> version: '+ str(cver_ver_notify['curver'])
 SearchModule.loadSearchModules()
 if(DEBUGFLAG):
@@ -75,6 +75,7 @@ def legal():
 
 @app.route('/s', methods=['GET'])
 def search():
+	
 	sugg.asktrend_allparallel()	
 	#~ parallel suggestion and search
 	if(DEBUGFLAG == False):

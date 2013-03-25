@@ -46,6 +46,10 @@ class DoParallelSearch:
 	def dosearch(self, args):
 		self.logic_items = self.logic_expr.findall(args['q'])
 		self.qry_nologic = self.logic_expr.sub(" ",args['q'])
+		if('selcat' in args):
+			self.qry_nologic += " " + args['selcat']
+			
+		self.logic_items = self.logic_expr.findall(args['q'])
 		#~ print self.logic_items
 		results = SearchModule.performSearch(self.qry_nologic, self.cfg )
 		self.results = summary_results(results, self.qry_nologic, self.logic_items)

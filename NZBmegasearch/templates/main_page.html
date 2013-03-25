@@ -16,7 +16,21 @@
 			<div  class="titlemain"><img src="static/title.png" width="387" height="" /> 	</div>
 			
 			<form action="/s" method="get" class="form-wrapper-01">
-				<input type="text" id="search" placeholder="Enter your keyword" name="q"><input type="submit" value="Search" id="submit" onclick="show_loader()">
+				<input type="text" id="search" placeholder="" name="q">
+			<span>
+			<select class="selcatstlye" name="selcat">
+				<option value="">No categ.</option>
+				<option value="720p">HD 720p</option>
+				<option value="1080p">HD 1080p</option>
+				<option value="OSX">Mac OSX</option>
+				<option value="XBOX360">Xbox360</option>
+				<option value="PS3">PS3</option>
+				<option value="ANDROID">Android</option>
+				<option value="MOBI">Ebook (mobi)</option>
+				<option value="EPUB">Ebook (epub)</option>
+			</select>
+			</span>
+				<input type="submit" value="Go" id="submit" onclick="show_loader()">
 			</form>
 			<div class="providerlist">  {{ nc  }} NZB indeces are searched each time you hit the button :)	</div>
 			<table class ="suggarea_macro">
