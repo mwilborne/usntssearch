@@ -19,9 +19,13 @@
 				<input type="text" id="search" placeholder="" name="q">
 			<span>
 			<select class="selcatstlye" name="selcat">
-				<option value="">No categ.</option>
-				<option value="720p">HD 720p</option>
+				<option value="">No categ.</option>				
 				<option value="1080p">HD 1080p</option>
+				<option value="720p">HD 720p</option>
+				<option value="BDRIP">SD BlurayRip</option>
+				<option value="DVDRIP">SD DVDRip</option>
+				<option value="DVDSCR">SD DVDScr</option>
+				<option value="CAM">SD CAM</option>
 				<option value="OSX">Mac OSX</option>
 				<option value="XBOX360">Xbox360</option>
 				<option value="PS3">PS3</option>
@@ -159,23 +163,25 @@
 	
 		<div class="bottomcenter">ver. {{ vr['curver'] }}  <br/></div>
 
-		<!-- Start of StatCounter Code for Default Guide -->
-		<script type="text/javascript">
-		var sc_project=8707188; 
-		var sc_invisible=1; 
-		var sc_security="f3bafd7f"; 
-		var scJsHost = (("https:" == document.location.protocol) ?
-		"https://secure." : "http://www.");
-		document.write("<sc"+"ript type='text/javascript' src='" +
-		scJsHost+
-		"statcounter.com/counter/counter.js'></"+"script>");
-		</script>
-		<noscript><div class="statcounter"><a title="web analytics"
-		href="http://statcounter.com/" target="_blank"><img
-		class="statcounter"
-		src="http://c.statcounter.com/8707188/0/f3bafd7f/1/"
-		alt="web analytics"></a></div></noscript>
-		<!-- End of StatCounter Code for Default Guide -->
+		{% if debug_flag == False  -%}
+			<!-- Start of StatCounter Code for Default Guide -->
+			<script type="text/javascript">
+			var sc_project=8707188; 
+			var sc_invisible=1; 
+			var sc_security="f3bafd7f"; 
+			var scJsHost = (("https:" == document.location.protocol) ?
+			"https://secure." : "http://www.");
+			document.write("<sc"+"ript type='text/javascript' src='" +
+			scJsHost+
+			"statcounter.com/counter/counter.js'></"+"script>");
+			</script>
+			<noscript><div class="statcounter"><a title="web analytics"
+			href="http://statcounter.com/" target="_blank"><img
+			class="statcounter"
+			src="http://c.statcounter.com/8707188/0/f3bafd7f/1/"
+			alt="web analytics"></a></div></noscript>
+			<!-- End of StatCounter Code for Default Guide -->
+		{%- endif %}
 
 	</body>
 </html>

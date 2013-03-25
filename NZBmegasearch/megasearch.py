@@ -59,7 +59,7 @@ class DoParallelSearch:
 	
 	def renderit_empty(self,params):	
 		return render_template('main_page.html', vr=params['ver'], nc=self.svalid, sugg = [], 
-								trend_show = params['trend_show'], trend_movie = params['trend_movie'] )
+								trend_show = params['trend_show'], trend_movie = params['trend_movie'], debug_flag = params['debugflag'])
 		
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -201,4 +201,4 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 
 	return render_template('main_page.html',results=niceResults, exist=existduplicates, 
 											vr=ver_notify, args=args, nc = svalid, sugg = sugg_list,
-											trend_show = params['trend_show'], trend_movie = params['trend_movie'])
+											trend_show = params['trend_show'], trend_movie = params['trend_movie'], debug_flag = params['debugflag'])

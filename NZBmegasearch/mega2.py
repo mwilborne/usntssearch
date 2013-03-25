@@ -94,7 +94,8 @@ def search():
 						'trend_movie': sugg.movie_trend, 
 						'trend_show': sugg.show_trend, 
 						'ver': cver_ver_notify,
-						'wrp':wrp
+						'wrp':wrp,
+						'debugflag':DEBUGFLAG
 						}
 	return mega_parall.renderit(params_dosearch)
 
@@ -126,7 +127,8 @@ def main_index():
 						'configr': cfg,
 						'trend_movie': sugg.movie_trend, 
 						'trend_show': sugg.show_trend, 
-						'ver': cver_ver_notify}
+						'ver': cver_ver_notify,
+						'debugflag':DEBUGFLAG}
 	return mega_parall.renderit_empty(params_dosearch)
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
