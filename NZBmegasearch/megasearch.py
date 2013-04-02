@@ -42,24 +42,46 @@ class DoParallelSearch:
 			if(self.cfg[i]['valid'] == '1'):
 				self.svalid = self.svalid + 1
 		self.logic_expr = re.compile("(?:^|\s)([-+])(\w+)")
-		
+		self.possibleopt = [ ['1080p', 'HD 1080p',''],
+							['720p','HD 720p',''],
+							['BDRIP','SD BlurayRip',''],
+							['DVDRIP','SD DVDRip',''],
+							['DVDSCR','SD DVDScr',''],
+							['CAM','SD CAM',''],
+							['OSX','Mac OSX',''],
+							['XBOX360','Xbox360',''],
+							['PS3','PS3',''],
+							['ANDROID','Android',''],
+							['MOBI','Ebook (mobi)',''],
+							['EPUB','Ebook (epub)',''] ]
+				
 	def dosearch(self, args):
 		self.logic_items = self.logic_expr.findall(args['q'])
 		self.qry_nologic = self.logic_expr.sub(" ",args['q'])
 		if('selcat' in args):
 			self.qry_nologic += " " + args['selcat']
-			
+
+		if(self.qry_nologic.replace(" ", "") == ""):
+			self.results = []
+			return self.results
+						
 		self.logic_items = self.logic_expr.findall(args['q'])
 		#~ print self.logic_items
 		results = SearchModule.performSearch(self.qry_nologic, self.cfg )
 		self.results = summary_results(results, self.qry_nologic, self.logic_items)
 		
 	def renderit(self,params):
+		params['selectable_opt']=self.possibleopt
+		if('selcat' in params['args']):
+			for slctg in params['selectable_opt']:
+				if(slctg[0] == params['args']['selcat']):
+					slctg[2] = 'selected'
 		return cleanUpResults(self.results, params['sugg'], params['ver'], params['args'], self.svalid, params)
 	
 	def renderit_empty(self,params):	
 		return render_template('main_page.html', vr=params['ver'], nc=self.svalid, sugg = [], 
-								trend_show = params['trend_show'], trend_movie = params['trend_movie'], debug_flag = params['debugflag'])
+								trend_show = params['trend_show'], trend_movie = params['trend_movie'], debug_flag = params['debugflag'],
+								sstring  = "", selectable_opt = self.possibleopt)
 		
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -198,7 +220,11 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 			'providertitle':results[i]['providertitle'],
 			'ignore' : results[i]['ignore']
 		})
-
+	
 	return render_template('main_page.html',results=niceResults, exist=existduplicates, 
 											vr=ver_notify, args=args, nc = svalid, sugg = sugg_list,
-											trend_show = params['trend_show'], trend_movie = params['trend_movie'], debug_flag = params['debugflag'])
+											trend_show = params['trend_show'], 
+											trend_movie = params['trend_movie'], 
+											debug_flag = params['debugflag'],
+											sstring  = params['args']['q'],
+											selectable_opt = params['selectable_opt'] )
