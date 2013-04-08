@@ -95,7 +95,7 @@ def loadSearchModules(moduleDir = None):
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 	
 # Perform a search using all available modules
-def performSearch(queryString,  cfg):
+def performSearch(queryString,  cfg, dsearch):
 	queryString = queryString.strip()
 
 	queryString = sanitize_strings(queryString)
@@ -125,6 +125,14 @@ def performSearch(queryString,  cfg):
 				threadHandles.append(t)
 			except Exception as e:
 				print 'Error starting thread  : ' + str(e)
+
+	for index in xrange(len(dsearch.ds)):
+			try:
+				t = threading.Thread(target=performSearchThreadDS, args=(queryString,lock,dsearch.ds[index]))
+				t.start()
+				threadHandles.append(t)
+			except Exception as e:
+				print 'Error starting deepsearch thread  : ' + str(e)
 
 	for t in threadHandles:
 		t.join()
@@ -163,6 +171,20 @@ def performSearchThread(queryString, neededModule, lock, cfg):
 	except Exception as e:
 		print e
  
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+	
+def performSearchThreadDS(queryString, lock, dsearch_one):
+	
+	localResults = dsearch_one.search(queryString)
+	lock.acquire()
+	globalResults.append(localResults)
+
+	try:
+		lock.release()
+	except Exception as e:
+		print e
+ 
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 # Exception to be raised when a search function is not implemented
 class NotImplementedException(Exception):

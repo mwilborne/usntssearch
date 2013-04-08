@@ -22,6 +22,7 @@ import logging.handlers
 import os
 import threading
 import SearchModule
+import DeepsearchModule
 from ApiModule import ApiResponses
 from SuggestionModule import SuggestionResponses
 from WarperModule import Warper
@@ -29,14 +30,14 @@ import megasearch
 import config_settings
 import miscdefs
 
-DEBUGFLAG = False
+DEBUGFLAG = True
 
 motd = '\n\n~*~ ~*~ NZBMegasearcH ~*~ ~*~'
 print motd
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-#~ bootstrap datefmt='%Y-%m-%d %H:%M:%S'
 cfg,cgen = config_settings.read_conf()
+cfg_deep = config_settings.read_conf_deepsearch()
 logsdir = SearchModule.resource_path('logs/')
 logging.basicConfig(filename=logsdir+'nzbmegasearch.log',level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log = logging.getLogger(__name__)
@@ -55,8 +56,9 @@ if(DEBUGFLAG):
 sugg = SuggestionResponses(cfg, cgen)
 #~ detached server for trends
 sugg.detached_trendpolling = 1
-mega_parall = megasearch.DoParallelSearch(cfg)	
-wrp = Warper (cgen)
+ds = DeepsearchModule.DeepSearch(cfg_deep, cgen)
+mega_parall = megasearch.DoParallelSearch(cfg, ds)
+wrp = Warper (cgen, ds)
 apiresp = ApiResponses(cfg, wrp)
 dwn = miscdefs.DownloadedStats()
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -71,6 +73,7 @@ def dstastprovide():
 def legal():
 	return (miscdefs.legal())
 	
+		
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 @app.route('/s', methods=['GET'])
@@ -135,7 +138,7 @@ def main_index():
 
 @app.route('/api', methods=['GET'])
 def api():
-	print request.args
+	#~ print request.args
 	return apiresp.dosearch(request.args)
 
 @app.route('/connect', methods=['GET'])

@@ -14,6 +14,7 @@
 #~ You should have received a copy of the GNU General Public License
 #~ along with NZBmegasearch.  If not, see <http://www.gnu.org/licenses/>.
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
+
 from sets import Set
 import decimal
 import datetime
@@ -32,7 +33,7 @@ log = logging.getLogger(__name__)
 class DoParallelSearch:
 	
 	# Set up class variables
-	def __init__(self, conf):
+	def __init__(self, conf, ds):
 		self.results = []
 		self.cfg = conf
 		self.svalid = 0
@@ -54,6 +55,8 @@ class DoParallelSearch:
 							['ANDROID','Android',''],
 							['MOBI','Ebook (mobi)',''],
 							['EPUB','Ebook (epub)',''] ]
+							
+		self.ds = ds					
 				
 	def dosearch(self, args):
 		self.logic_items = self.logic_expr.findall(args['q'])
@@ -67,7 +70,7 @@ class DoParallelSearch:
 						
 		self.logic_items = self.logic_expr.findall(args['q'])
 		#~ print self.logic_items
-		results = SearchModule.performSearch(self.qry_nologic, self.cfg )
+		results = SearchModule.performSearch(self.qry_nologic, self.cfg, self.ds )
 		self.results = summary_results(results, self.qry_nologic, self.logic_items)
 		
 	def renderit(self,params):
@@ -209,7 +212,7 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 			qryforwarp += '&m='+ results[i]['req_pwd']
 		niceResults.append({
 			'url':results[i]['url'],
-			'url_encr':'warp?x='+qryforwarp+'&y=1',
+			'url_encr':'warp?x='+qryforwarp,
 			'title':results[i]['title'],
 			'filesize':str(round(szf,1)) + mgsz,
 			'cat' : category_str,

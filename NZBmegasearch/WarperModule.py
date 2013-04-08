@@ -38,7 +38,7 @@ log = logging.getLogger(__name__)
 class Warper:
 
 	# Set up class variables
-	def __init__(self,cgen):
+	def __init__(self,cgen,ds):
 		self.base64scramble_enc={
             'A':['A',0],'B':['B',1],'C':['C',2],'D':['D',3],'E':['E',4],'F':['F',5] ,
             'G':['G',6],'H':['H',7],'I':['I',8],'J':['J',9],'K':['K',10],'L':['L',11],
@@ -57,6 +57,7 @@ class Warper:
 		self.seedno = cgen['seed_warptable']
 		self.base64scramble_dec = self.base64scramble_enc
 		self.generate_hashtable()
+		self.dsearch = ds
 		print '>> Hash table has been initialized: ' + str(self.seedno)
 		
 		#~ encstrhash = self.chash64_encode('pillone@mailub')
@@ -135,35 +136,61 @@ class Warper:
 			SearchModule.loadSearchModules()
 		
 		cookie = {}
+		
+		dwntype = 0
+		#~ standard search
 		for module in SearchModule.loadedModules:
 			if( module.typesrch == args['m']):
+				dwntype = 0
 				if(module.dologin() == True):
 					cookie =  module.cookie
 				else: 
 					return retfail
-				
- 		try:
-			opener = urllib2.build_opener()
-			opener.addheaders.append(('Cookie', 'FTDWSESSID='+cookie['FTDWSESSID']))
-			response = opener.open(urltouse)
 
-		except Exception as e:
-			return retfail
+		#~ deep search
+		deepidx = 0
+		for index in xrange(len(self.dsearch.ds)):
+			if( self.dsearch.ds[index].typesrch == args['m']):
+				dwntype = 1
+				deepidx = index
+				#~ print self.dsearch.ds[index].typesrch
+
+		f_name = ''
+		if(dwntype == 0):
+			log.info('WARPNGN Cookie FTD found')
+			try:
+				opener = urllib2.build_opener()
+				opener.addheaders.append(('Cookie', 'FTDWSESSID='+cookie['FTDWSESSID']))
+				response = opener.open(urltouse)
+
+			except Exception as e:
+				return retfail
+
+		if(dwntype == 1):
+			log.info('WARPNGN Cookie deep found')
+			response = self.dsearch.ds[deepidx].download(urltouse)
+			if(response == ''):
+				return -1
  		
 		fcontent = response.read()
 		#~ print response.info()
 		f=tempfile.NamedTemporaryFile(delete=False)
 		f.write(fcontent)
-		f.close()	
+		f.close()
 		fresponse = send_file(f.name, mimetype='application/x-nzb;', as_attachment=True, 
 						attachment_filename='yourmovie.nzb', add_etags=False, cache_timeout=None, conditional=False)
 		os.remove(f.name)
 		
 		for i in xrange(len(response.info().headers)):
+			#~ print response.info().headers[i]
 			if(response.info().headers[i].find('Content-Encoding')  != -1):
 				fresponse.headers["Content-Encoding"] = 'gzip'
-				break
-		fresponse.headers['Content-Disposition'] = response.headers['Content-Disposition']
+			riff = response.info().headers[i].find('Content-Disposition')
+			if( riff != -1):
+				fresponse.headers["Content-Disposition"] = response.info().headers[i][riff+21:len(response.info().headers[i])].strip()
+				
+		#~ fresponse.headers['Content-Disposition'] = response.headers['Content-Disposition']
+		#~ print fresponse.headers
 		return fresponse	
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -200,10 +227,7 @@ class Warper:
 				return -1		
 				
 			response = self.beam_notenc(decodedurl)
-			if('y' in arguments):
-				log.info ('RAWNGXY: '+str(arguments['x'])+'--y='+str(arguments['y']))
-			else:
-				log.info ('RAWNGXN: '+arguments['x'])	
+			log.info ('RAWNGXN: '+arguments['x'])	
 			log.info ('WARPNGX: ' + decodedurl + ' --> ' + response.headers['X-Accel-Redirect'])	
 			#~ print response.headers['X-Accel-Redirect']
 			

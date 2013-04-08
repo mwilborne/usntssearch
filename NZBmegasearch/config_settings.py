@@ -74,6 +74,27 @@ def	write_conf(request_form):
 	with open('custom_params.ini', 'wt') as configfile:
 		parser.write(configfile)
 
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+
+def read_conf_deepsearch(): 
+	cfg_struct = []
+	parser = SafeConfigParser()
+	parser.read('deepsearch_params.ini')
+
+	numserver = parser.get('general', 'numserver')	
+
+	for i in xrange(int(numserver)):
+		d1 = {'url': parser.get('search_provider%d' % (i+1)  , 'url'),
+			  'user': parser.get('search_provider%d' % (i+1)  , 'user'),
+			  'pwd': parser.get('search_provider%d' % (i+1)  , 'pwd'),
+			  'valid': parser.get('search_provider%d' % (i+1)  , 'valid'),
+			  }
+		cfg_struct.append(d1)
+	return 	cfg_struct
+
+
+
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 def read_conf(forcedcustom=''): 
