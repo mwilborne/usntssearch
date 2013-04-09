@@ -44,6 +44,7 @@ class DoParallelSearch:
 		for i in xrange(len(self.cfg)):
 			if(self.cfg[i]['valid'] != 0):
 				self.svalid = self.svalid + 1
+		self.svalid = self.svalid + len(ds.ds)			
 		self.logic_expr = re.compile("(?:^|\s)([-+])(\w+)")
 		self.possibleopt = [ ['1080p', 'HD 1080p',''],
 							['720p','HD 720p',''],
