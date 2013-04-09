@@ -95,9 +95,9 @@ def loadSearchModules(moduleDir = None):
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 	
 # Perform a search using all available modules
-def performSearch(queryString,  cfg, dsearch):
+def performSearch(queryString,  cfg, dsearch=None):
+		
 	queryString = queryString.strip()
-
 	queryString = sanitize_strings(queryString)
 	#~ print queryString
 	
@@ -117,7 +117,10 @@ def performSearch(queryString,  cfg, dsearch):
 				neededModules.append(copy.copy(module))
 
 	for index in xrange(len(cfg)):
-		if(cfg[index]['valid']== '1'):
+		rval = False
+		if (((dsearch is not None) and (cfg[index]['valid'] == 2)) or (cfg[index]['valid'] == 1)):
+			rval = True
+		if(rval == True):
 			try:
 				#~ print neededModule 
 				t = threading.Thread(target=performSearchThread, args=(queryString,neededModules[index],lock,cfg[index]))
@@ -126,13 +129,14 @@ def performSearch(queryString,  cfg, dsearch):
 			except Exception as e:
 				print 'Error starting thread  : ' + str(e)
 
-	for index in xrange(len(dsearch.ds)):
-			try:
-				t = threading.Thread(target=performSearchThreadDS, args=(queryString,lock,dsearch.ds[index]))
-				t.start()
-				threadHandles.append(t)
-			except Exception as e:
-				print 'Error starting deepsearch thread  : ' + str(e)
+	if(dsearch is not None):
+		for index in xrange(len(dsearch.ds)):
+				try:
+					t = threading.Thread(target=performSearchThreadDS, args=(queryString,lock,dsearch.ds[index]))
+					t.start()
+					threadHandles.append(t)
+				except Exception as e:
+					print 'Error starting deepsearch thread  : ' + str(e)
 
 	for t in threadHandles:
 		t.join()

@@ -36,7 +36,7 @@ def	write_conf(request_form):
 				parser.set('search_provider%s' % counter, 'url',request_form['host%d' % i].replace(" ", ""))
 				parser.set('search_provider%s' % counter, 'api',request_form['API%d' % i].replace(" ", ""))
 				parser.set('search_provider%s' % counter, 'type', request_form['type%d' % i].replace(" ", ""))
-				parser.set('search_provider%s' % counter, 'valid', '1')
+				parser.set('search_provider%s' % counter, 'valid', int(1))
 				counter = counter + 1
 	parser.add_section('general')
 	parser.set('general', 'numserver', str(counter-1))
@@ -53,9 +53,9 @@ def	write_conf(request_form):
 			parser.add_section('bi_search_provider%s' % counter2)
 			parser.set('bi_search_provider%s' % counter2, 'type', request_form['bi_host%d' % i].replace(" ", ""))
 			if (request_form.has_key('bi_host%dactive' % i)  == True):
-				parser.set('bi_search_provider%s' % counter2, 'valid', '1')
+				parser.set('bi_search_provider%s' % counter2, 'valid', int(1))
 			else:
-				parser.set('bi_search_provider%s' % counter2, 'valid', '0')
+				parser.set('bi_search_provider%s' % counter2, 'valid', int(0))
 			
 			if (request_form.has_key('bi_host%dlogin' % i)  == True):	
 				blgin = request_form['bi_host%dlogin' % i].replace(" ", "")
@@ -63,7 +63,7 @@ def	write_conf(request_form):
 				parser.set('bi_search_provider%s' % counter2, 'login', blgin)
 				parser.set('bi_search_provider%s' % counter2, 'pwd', bpwd)
 				if(len(blgin) == 0 and len(bpwd) == 0):
-					parser.set('bi_search_provider%s' % counter2, 'valid', '0')
+					parser.set('bi_search_provider%s' % counter2, 'valid', int(0))
 
 			counter2 = counter2 + 1	
 	
@@ -88,7 +88,7 @@ def read_conf_deepsearch():
 		d1 = {'url': parser.get('search_provider%d' % (i+1)  , 'url'),
 			  'user': parser.get('search_provider%d' % (i+1)  , 'user'),
 			  'pwd': parser.get('search_provider%d' % (i+1)  , 'pwd'),
-			  'valid': parser.get('search_provider%d' % (i+1)  , 'valid'),
+			  'valid': int(parser.get('search_provider%d' % (i+1)  , 'valid')),
 			  }
 		cfg_struct.append(d1)
 	return 	cfg_struct
@@ -116,11 +116,12 @@ def read_conf_fn(forcedcustom=''):
 	gen_log_backupcount = int(parser.get('general', 'max_log_backupcount'))
 	gen_seed_warptable = int(parser.get('general', 'seed_warptable'))
 	gen_trends_refreshrate = int(parser.get('general', 'trends_refreshrate'))
+	gen_motd = parser.get('general', 'motd')
 	gen_stats_key = parser.get('general', 'stats_key')
 	co1 = {'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd, 'general_trend' : gen_trd, 
 			'default_timeout' : gen_timeout, 'max_cache_age' : gen_cacheage, 'log_backupcount': gen_log_backupcount, 
 			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable, 'trends_refreshrate':gen_trends_refreshrate,
-			'stats_key' : gen_stats_key}
+			'stats_key' : gen_stats_key, 'motd':gen_motd}
 	
 	#~ chk if exists
 	cst_parser = SafeConfigParser()
@@ -138,7 +139,7 @@ def read_conf_fn(forcedcustom=''):
 			d1 = {'url': cst_parser.get('search_provider%d' % (i+1)  , 'url'),
 				  'type': cst_parser.get('search_provider%d' % (i+1)  , 'type'),
 				  'api': cst_parser.get('search_provider%d' % (i+1)  , 'api'),
-				  'valid': cst_parser.get('search_provider%d' % (i+1)  , 'valid'),
+				  'valid': int(cst_parser.get('search_provider%d' % (i+1)  , 'valid')),
 				  'timeout':  gen_timeout,
 				  'builtin': 0
 				  }
@@ -165,7 +166,7 @@ def read_conf_fn(forcedcustom=''):
 				 lgn = cst_parser.get('bi_search_provider%d' % (i+1)  , 'login')
 				 pwd = cst_parser.get('bi_search_provider%d' % (i+1)  , 'pwd')
 			
-			d1 = {'valid': cst_parser.get('bi_search_provider%d' % (i+1)  , 'valid'),
+			d1 = {'valid': int(cst_parser.get('bi_search_provider%d' % (i+1)  , 'valid')),
 				  'type': cst_parser.get('bi_search_provider%d' % (i+1)  , 'type'),
 				  'login': lgn,
 				  'pwd': pwd,
@@ -199,7 +200,7 @@ def html_builtin_output(cffile, genopt):
 				option=''
 			for i in xrange(len(cffile)):
 				if(cffile[i]['type'] == module.typesrch):
-					if(cffile[i]['valid'] == '0'):
+					if(cffile[i]['valid'] == 0):
 						option=''
 					else: 	
 						option='checked=yes'

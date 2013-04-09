@@ -29,8 +29,10 @@ from WarperModule import Warper
 import megasearch
 import config_settings
 import miscdefs
+import random
+import time
 
-DEBUGFLAG = True
+DEBUGFLAG = False
 
 motd = '\n\n~*~ ~*~ NZBMegasearcH ~*~ ~*~'
 print motd
@@ -56,8 +58,16 @@ if(DEBUGFLAG):
 sugg = SuggestionResponses(cfg, cgen)
 #~ detached server for trends
 sugg.detached_trendpolling = 1
+
+#~ wait for login init
+if(DEBUGFLAG == False):
+	random.seed()
+	sleeptime = random.randrange(0, 10)
+	log.info('Wait ' + str(sleeptime) + 's for initialization...')
+	time.sleep(sleeptime)	
 ds = DeepsearchModule.DeepSearch(cfg_deep, cgen)
-mega_parall = megasearch.DoParallelSearch(cfg, ds)
+
+mega_parall = megasearch.DoParallelSearch(cfg, cgen, ds)
 wrp = Warper (cgen, ds)
 apiresp = ApiResponses(cfg, wrp)
 dwn = miscdefs.DownloadedStats()

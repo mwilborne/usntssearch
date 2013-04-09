@@ -103,19 +103,27 @@ class SuggestionResponses:
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 	def asktrend_loadondisk(self):
-		
-		try:
-			with open(self.trendsdir+'trends_mv.json', 'rt') as fp:
-				self.movie_trend = json.load(fp)
-		except Exception as e:
-			return
 
-		try:
-			with open(self.trendsdir+'trends_tv.json', 'rt') as fp:
-				self.show_trend = json.load(fp)
+		dt1 =  (datetime.datetime.now() - datetime.datetime.fromtimestamp(self.movie_trend_ts))
+		dl = (dt1.days+1) * dt1.seconds
+		if(dl > self.trends_refreshrate):
+			print '>> Loading trends from disk now'
+			try:
+				with open(self.trendsdir+'trends_mv.json', 'rt') as fp:
+					self.movie_trend = json.load(fp)
+			except Exception as e:
+				return
 
-		except Exception as e:
-			return
+			try:
+				with open(self.trendsdir+'trends_tv.json', 'rt') as fp:
+					self.show_trend = json.load(fp)
+
+			except Exception as e:
+				return
+
+			if(len(self.movie_trend)):
+				self.movie_trend_ts = time.time()
+	
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 

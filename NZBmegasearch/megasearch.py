@@ -26,6 +26,7 @@ import SearchModule
 import logging
 import base64
 import re
+import copy
 
 log = logging.getLogger(__name__)
 
@@ -33,14 +34,15 @@ log = logging.getLogger(__name__)
 class DoParallelSearch:
 	
 	# Set up class variables
-	def __init__(self, conf, ds):
+	def __init__(self, conf, cgen, ds):
 		self.results = []
 		self.cfg = conf
+		self.cgen = cgen
 		self.svalid = 0
 		self.qry_nologic = ''
 		self.logic_items = []
 		for i in xrange(len(self.cfg)):
-			if(self.cfg[i]['valid'] == '1'):
+			if(self.cfg[i]['valid'] != 0):
 				self.svalid = self.svalid + 1
 		self.logic_expr = re.compile("(?:^|\s)([-+])(\w+)")
 		self.possibleopt = [ ['1080p', 'HD 1080p',''],
@@ -55,7 +57,7 @@ class DoParallelSearch:
 							['ANDROID','Android',''],
 							['MOBI','Ebook (mobi)',''],
 							['EPUB','Ebook (epub)',''] ]
-							
+		self.possibleopt_cpy = self.possibleopt							
 		self.ds = ds					
 				
 	def dosearch(self, args):
@@ -74,7 +76,8 @@ class DoParallelSearch:
 		self.results = summary_results(results, self.qry_nologic, self.logic_items)
 		
 	def renderit(self,params):
-		params['selectable_opt']=self.possibleopt
+		params['selectable_opt']=  copy.deepcopy(self.possibleopt)
+		params['motd']=self.cgen['motd']
 		if('selcat' in params['args']):
 			for slctg in params['selectable_opt']:
 				if(slctg[0] == params['args']['selcat']):
@@ -84,7 +87,7 @@ class DoParallelSearch:
 	def renderit_empty(self,params):	
 		return render_template('main_page.html', vr=params['ver'], nc=self.svalid, sugg = [], 
 								trend_show = params['trend_show'], trend_movie = params['trend_movie'], debug_flag = params['debugflag'],
-								sstring  = "", selectable_opt = self.possibleopt)
+								sstring  = "", selectable_opt = self.possibleopt, motd = self.cgen['motd'])
 		
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -195,6 +198,10 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 		if (szf > 1000.0): 
 			szf = szf /1000
 			mgsz = ' GB '
+		fsze1 = str(round(szf,1)) + mgsz
+		
+		if (results[i]['size'] == -1):
+			fsze1 = 'N/A'
 		totdays = (datetime.datetime.today() - datetime.datetime.fromtimestamp(results[i]['posting_date_timestamp'])).days + 1		
 		category_str = '' 
 		keynum = len(results[i]['categ'])
@@ -214,7 +221,7 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 			'url':results[i]['url'],
 			'url_encr':'warp?x='+qryforwarp,
 			'title':results[i]['title'],
-			'filesize':str(round(szf,1)) + mgsz,
+			'filesize':fsze1,
 			'cat' : category_str,
 			'age':totdays,
 			'details':results[i]['release_comments'],
@@ -230,4 +237,5 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 											trend_movie = params['trend_movie'], 
 											debug_flag = params['debugflag'],
 											sstring  = params['args']['q'],
-											selectable_opt = params['selectable_opt'] )
+											selectable_opt = params['selectable_opt'],
+											motd = params['motd'] )

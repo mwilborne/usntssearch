@@ -102,7 +102,7 @@ class ah_WMBidx(SearchModule):
 			d1 = { 
 				'title': elem_title.text,
 				'poster': elem_poster,
-				'size': int(elem_url.attrib['length']),
+				'size': -1,
 				'url': elem_url.attrib['url'],
 				'filelist_preview': '',
 				'group': '',
