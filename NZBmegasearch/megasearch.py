@@ -62,10 +62,24 @@ class DoParallelSearch:
 		self.ds = ds					
 				
 	def dosearch(self, args):
+		if('q' not in args):
+			self.results = []
+			
+			
 		self.logic_items = self.logic_expr.findall(args['q'])
 		self.qry_nologic = self.logic_expr.sub(" ",args['q'])
 		if('selcat' in args):
 			self.qry_nologic += " " + args['selcat']
+
+		if( len(args['q']) == 0 ):
+			if('selcat' in args):
+				if(len(args['selcat'])==0):
+					self.results = []
+					return self.results
+			else:
+				self.results = []
+				return self.results
+		print 'GERE'
 
 		if(self.qry_nologic.replace(" ", "") == ""):
 			self.results = []

@@ -212,7 +212,7 @@ class DeepSearch_one:
 
 	def search(self, srchstr):
 		socket.setdefaulttimeout(self.timeout)
-		locale.setlocale( locale.LC_ALL, 'english_USA' )
+		locale.setlocale( locale.LC_ALL, 'en_US.utf8' )
 
 		if	(self.chkcookie() == False):
 			if(self.dologin() == False):

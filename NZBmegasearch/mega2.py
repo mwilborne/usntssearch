@@ -32,7 +32,7 @@ import miscdefs
 import random
 import time
 
-DEBUGFLAG = False
+DEBUGFLAG = True
 
 motd = '\n\n~*~ ~*~ NZBMegasearcH ~*~ ~*~'
 print motd
