@@ -26,6 +26,7 @@ from BeautifulSoup  import BeautifulSoup
 import config_settings
 from urllib2 import urlparse
 import socket
+import locale
 
 MAXTIMEOUT=10
 log = logging.getLogger(__name__)
@@ -211,6 +212,7 @@ class DeepSearch_one:
 
 	def search(self, srchstr):
 		socket.setdefaulttimeout(self.timeout)
+		locale.setlocale( locale.LC_ALL, 'english_USA' )
 
 		if	(self.chkcookie() == False):
 			if(self.dologin() == False):
@@ -243,12 +245,14 @@ class DeepSearch_one:
 			#~ rawline = str(sz1).split()
 			for sz2 in sz1.findAll(text=True):
 				sz2s =  sz2.split()
+				
+
 				if(len(sz2s) == 2):
 					#~ print sz2s[1].lower()
 					if (sz2s[1].lower() == 'mb' ):
-						bytesize.append(int(self.basic_sz * float(sz2s[0])))
+						bytesize.append(int(self.basic_sz * locale.atof(sz2s[0])))
 					if (sz2s[1].lower() == 'gb' ):
-						bytesize.append(int(self.basic_sz * float(sz2s[0]) * 1024))
+						bytesize.append(int(self.basic_sz * locale.atof(sz2s[0]) * 1024))
 		#~ print bytesize
 
 		#~ 2010-05-08 18:53:09
