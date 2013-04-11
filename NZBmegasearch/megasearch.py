@@ -64,6 +64,7 @@ class DoParallelSearch:
 	def dosearch(self, args):
 		if('q' not in args):
 			self.results = []
+			return self.results
 			
 			
 		self.logic_items = self.logic_expr.findall(args['q'])
@@ -79,8 +80,6 @@ class DoParallelSearch:
 			else:
 				self.results = []
 				return self.results
-		print 'GERE'
-
 		if(self.qry_nologic.replace(" ", "") == ""):
 			self.results = []
 			return self.results
