@@ -67,32 +67,44 @@ class DeepSearch_one:
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
+	def reset_cookies(self):
+		self.cj = cookielib.LWPCookieJar()
+		self.br.set_cookiejar(self.cj)
+
+	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+
 	def mech_error_generic (self, e):
 		if(str(e).find("Errno 111") != -1):
 			print "Wrong url or site down " + self.baseURL
 			log.warning("Wrong url or site down " + self.baseURL)
-			return	
+			return 111
 		if(str(e).find("timed out") != -1):
 			print "Too much time to respond "  + self.baseURL
 			log.warning("Too much time to respond "  + self.baseURL)
-			return
+			return 500
+		if(str(e).find("HTTP Error 302") == -1):
+			log.warning("Fetched exception login: " + str(e) + self.baseURL)
+			return 302
 		print "Fetched exception: "  + self.baseURL + str(e)
 		log.warning("Fetched exception: "  + self.baseURL + str(e))
-		return
+		return 440
 
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 	def chkcookie(self):
 		cexp = True
 		for cookie in self.br._ua_handlers['_cookies'].cookiejar:
+			#~ print self.br._ua_handlers['_cookies'].cookiejar
 			if( cookie.is_expired() ) :
 				cexp = False
+		#~ print len(self.br._ua_handlers['_cookies'].cookiejar)		
 		if(len(self.br._ua_handlers['_cookies'].cookiejar) == 0):
 			cexp = False
 		return cexp
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 	
 	def dologin(self):
+				
 		socket.setdefaulttimeout(self.timeout)
 		if	( self.chkcookie() == True):
 			return True
@@ -105,10 +117,12 @@ class DeepSearch_one:
 		
 		try:
 			self.br.open(loginurl)
+			print loginurl			
 		except Exception as e:
+			print str(e)
 			self.mech_error_generic(e)
 			return False
-			
+		
 		formcount=0
 		formfound=False
 		for frm in self.br.forms():  
@@ -117,10 +131,10 @@ class DeepSearch_one:
 				formfound = True
 				break
 			formcount=formcount+1
-			
+				
 		if(	formfound == False):
 			return False
-			
+
 		self.br.select_form(nr=formcount)
 		self.br["username"] = self.cur_cfg['user']
 		self.br["password"] = self.cur_cfg['pwd']
@@ -137,9 +151,10 @@ class DeepSearch_one:
 				return False
 
 		#~ eternal cookies
-		for cookie in self.br._ua_handlers['_cookies'].cookiejar:
-			cookie.expires = None
-							
+		#~ for cookie in self.br._ua_handlers['_cookies'].cookiejar:
+			#~ print cookie
+			#~ cookie.expires = None
+
 		return True		
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -154,7 +169,9 @@ class DeepSearch_one:
 		try:
 			res = self.br.open(loginurl)
 		except Exception as e:
-			self.mech_error_generic(e)
+			eret = self.mech_error_generic(e)
+			if(eret == 302):
+				self.reset_cookies()
 			return []
 
 		data = res.get_data()  
@@ -220,13 +237,20 @@ class DeepSearch_one:
 
 		mainurl = self.cur_cfg['url']
 		loginurl = mainurl + "/search/"+srchstr
+		timestamp_s = time.time()	
 		try:
 			res = self.br.open(loginurl)
 		except Exception as e:
 			self.mech_error_generic(e)
+			eret = self.mech_error_generic(e)
+			if(eret == 302):
+				self.reset_cookies()
 			return []
 
 		data = res.get_data()  
+		timestamp_e = time.time()
+		print mainurl + " " + str(timestamp_e - timestamp_s)
+
 		soup = BeautifulSoup(data)
 
 	#~ def searchDBG(self, srchstr):
@@ -291,5 +315,7 @@ class DeepSearch_one:
 			}
 			#~ print d1
 			parsed_data.append(d1)
+		
+		
 		return parsed_data
 		
