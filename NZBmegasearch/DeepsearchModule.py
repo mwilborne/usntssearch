@@ -28,7 +28,6 @@ from urllib2 import urlparse
 import socket
 import locale
 
-MAXTIMEOUT=10
 log = logging.getLogger(__name__)
 
 class DeepSearch:
@@ -116,6 +115,7 @@ class DeepSearch_one:
 
 		
 		try:
+			socket.setdefaulttimeout(self.timeout)
 			self.br.open(loginurl)
 			print loginurl			
 		except Exception as e:
@@ -166,6 +166,7 @@ class DeepSearch_one:
 
 		loginurl = self.cur_cfg['url'] + "/profile"
 		try:
+			socket.setdefaulttimeout(self.timeout)
 			res = self.br.open(loginurl)
 		except Exception as e:
 			eret = self.mech_error_generic(e)
@@ -229,7 +230,7 @@ class DeepSearch_one:
 	def search(self, srchstr):
 		socket.setdefaulttimeout(self.timeout)
 		locale.setlocale( locale.LC_ALL, 'en_US.utf8' )
-
+		
 		if	(self.chkcookie() == False):
 			if(self.dologin() == False):
 				return []
@@ -238,6 +239,7 @@ class DeepSearch_one:
 		loginurl = mainurl + "/search/"+srchstr
 		timestamp_s = time.time()	
 		try:
+			socket.setdefaulttimeout(self.timeout)
 			res = self.br.open(loginurl)
 		except Exception as e:
 			self.mech_error_generic(e)
@@ -245,6 +247,7 @@ class DeepSearch_one:
 			print eret
 			if(eret == 302):
 				self.reset_cookies()
+			return []	
 
 		data = res.get_data()  
 		timestamp_e = time.time()

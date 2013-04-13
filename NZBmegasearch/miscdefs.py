@@ -30,7 +30,6 @@ import urlparse
 import urllib
 import datetime
 import json
-import numpy
 from operator import itemgetter
 
 log = logging.getLogger(__name__)
@@ -111,20 +110,21 @@ class DownloadedStats:
 				#~ print line
 				if(value[0] not in stat_info):
 					stat_info[value[0]] = []
-				else:	
-					stat_info[value[0]].append( float(value[1]) )
+				stat_info[value[0]].append( float(value[1]) )
 			#~ print stat_info
 			 
 			stat_info_curated = []
 			uidx = 0
 			for key in stat_info.keys():
+				meant = float(sum(stat_info[key]))/len(stat_info[key]) if len(stat_info[key]) > 0 else float('nan')
+				mediant = sorted(stat_info[key])[len(stat_info[key])/2]
 				stat_info_curated_t = {}
 				stat_info_curated_t['succ_call'] = len(stat_info[key])
 				stat_info_curated_t['name'] = key
-				stat_info_curated_t['mean'] = numpy.mean(stat_info[key]) 
-				stat_info_curated_t['median'] = numpy.median(stat_info[key])
-				stat_info_curated_t['min'] = numpy.min(stat_info[key])
-				stat_info_curated_t['max'] =  numpy.max(stat_info[key])
+				stat_info_curated_t['mean'] = meant
+				stat_info_curated_t['median'] = mediant
+				stat_info_curated_t['min'] = min(stat_info[key])
+				stat_info_curated_t['max'] = max(stat_info[key])
 				stat_info_curated.append(stat_info_curated_t)
 				uidx += 1
 		
