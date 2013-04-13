@@ -12,6 +12,6 @@ rm /tmp/logstats_gen
 grep "$DT" $LOGNAME | grep 'WARPNGX: '  | awk '{print $9}' > /tmp/logstats
 grep "$DT" $LOGNAME.1 | grep 'WARPNGX: '  | awk '{print $9}' >> /tmp/logstats
 
-grep "$DT" $LOGNAME | grep ' TS '  | awk '{print $9, $10}'   >> /tmp/logstats_gen
-
+grep "$DT" $LOGNAME | grep ' TS '  | awk '{print $9, $10}'   > /tmp/logstats_gen
+grep "$DT" $LOGNAME.1 | grep ' TS '  | awk '{print $9, $10}'   >> /tmp/logstats_gen
 
