@@ -68,7 +68,6 @@ class DeepSearch_one:
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 	def reset_cookies(self):
-		print 'COOKIE RESET'
 		self.cj = cookielib.LWPCookieJar()
 		self.br.set_cookiejar(self.cj)
 
@@ -101,7 +100,6 @@ class DeepSearch_one:
 		#~ print len(self.br._ua_handlers['_cookies'].cookiejar)		
 		if(len(self.br._ua_handlers['_cookies'].cookiejar) == 0):
 			cexp = False
-		print  'CHKCUK ' + str(cexp)
 		return cexp
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 	
@@ -247,8 +245,6 @@ class DeepSearch_one:
 			print eret
 			if(eret == 302):
 				self.reset_cookies()
-				if(self.dologin() == False):
-					return []
 
 		data = res.get_data()  
 		timestamp_e = time.time()
