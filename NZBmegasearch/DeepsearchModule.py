@@ -68,6 +68,7 @@ class DeepSearch_one:
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 	def reset_cookies(self):
+		print 'COOKIE RESET'
 		self.cj = cookielib.LWPCookieJar()
 		self.br.set_cookiejar(self.cj)
 
@@ -82,7 +83,7 @@ class DeepSearch_one:
 			print "Too much time to respond "  + self.baseURL
 			log.warning("Too much time to respond "  + self.baseURL)
 			return 500
-		if(str(e).find("HTTP Error 302") == -1):
+		if(str(e).find("HTTP Error 302") != -1):
 			log.warning("Fetched exception login: " + str(e) + self.baseURL)
 			return 302
 		print "Fetched exception: "  + self.baseURL + str(e)
@@ -100,6 +101,7 @@ class DeepSearch_one:
 		#~ print len(self.br._ua_handlers['_cookies'].cookiejar)		
 		if(len(self.br._ua_handlers['_cookies'].cookiejar) == 0):
 			cexp = False
+		print  'CHKCUK ' + str(cexp)
 		return cexp
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 	
@@ -134,7 +136,6 @@ class DeepSearch_one:
 				
 		if(	formfound == False):
 			return False
-
 		self.br.select_form(nr=formcount)
 		self.br["username"] = self.cur_cfg['user']
 		self.br["password"] = self.cur_cfg['pwd']
@@ -243,9 +244,11 @@ class DeepSearch_one:
 		except Exception as e:
 			self.mech_error_generic(e)
 			eret = self.mech_error_generic(e)
+			print eret
 			if(eret == 302):
 				self.reset_cookies()
-			return []
+				if(self.dologin() == False):
+					return []
 
 		data = res.get_data()  
 		timestamp_e = time.time()
