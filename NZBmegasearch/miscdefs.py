@@ -128,7 +128,7 @@ class DownloadedStats:
 				stat_info_curated.append(stat_info_curated_t)
 				uidx += 1
 		
-			results = sorted(stat_info_curated, key=itemgetter('median'))
+			stat_info_curated = sorted(stat_info_curated, key=itemgetter('median'))
 		return render_template('stats_gen.html',stat_cur=stat_info_curated)
 
 	def get(self,args):
