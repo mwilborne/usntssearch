@@ -122,8 +122,8 @@ def summary_results(rawResults, strsearch, logic_items=[]):
 			
 	strsearch1 = SearchModule.sanitize_strings(strsearch)
 	strsearch1_collection = Set(strsearch1.split("."))	
-	
-	rcount = [0]*2
+
+	rcount = [0]*3
 	for z in xrange(len(results)):
 		findone = 0 
 		results[z]['ignore'] = 0			
@@ -131,14 +131,14 @@ def summary_results(rawResults, strsearch, logic_items=[]):
 		if ( len(intrs) ==  len(strsearch1_collection)):			
 			findone = 1
 		else:
-			results[z]['ignore'] = 1	
+			results[z]['ignore'] = 2
 
 		#~ print strsearch1_collection
 		#~ print intrs
 		#~ print findone 
 		#~ print '------------------'
 
-		if(findone):
+		if(findone and results[z]['ignore'] == 0):
 			#~ print titles[z]
 			for v in xrange(z+1,len(results)):
 				if(titles[z] == titles[v]):
@@ -161,24 +161,24 @@ def summary_results(rawResults, strsearch, logic_items=[]):
 			include_coll.add(logic_items[i][1])
 	if(len(include_coll)):
 		for z in xrange(len(results)):
-			intrs_i = include_coll.intersection(sptitle_collection[z])
-			if ( len(intrs_i) == 0 ):			
-				results[z]['ignore'] = 2
+			if(results[z]['ignore'] < 2):
+				intrs_i = include_coll.intersection(sptitle_collection[z])
+				if ( len(intrs_i) == 0 ):			
+					results[z]['ignore'] = 2
 	if(len(exclude_coll)):
 		for z in xrange(len(results)):
-			intrs_e = exclude_coll.intersection(sptitle_collection[z])
-			if ( len(intrs_e) > 0 ):			
-				results[z]['ignore'] = 2
+			if(results[z]['ignore'] < 2):
+				intrs_e = exclude_coll.intersection(sptitle_collection[z])
+				if ( len(intrs_e) > 0 ):			
+					results[z]['ignore'] = 2
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 	
-	mssg = '[' + strsearch1 + ']'+ ' [' + strsearch + '] ' + str(rcount[0]) + ' ' + str(rcount[1])
+	mssg = '[' + strsearch1 + ']'+ ' [' + strsearch + '] ' + str(rcount[0]) + ' ' + str(rcount[1]) + ' ' + str(rcount[2])
 	print mssg
 	log.info (mssg)
 
 	return results
 	
- 
- 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 # Generate HTML for the results
@@ -203,6 +203,9 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 			
 	#~ do nice 
 	for i in xrange(len(results)):
+		if(results[i]['ignore'] == 2):
+			continue
+			
 		if(results[i]['ignore'] == 1):
 			existduplicates = 1
 

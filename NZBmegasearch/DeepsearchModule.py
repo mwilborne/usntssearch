@@ -70,7 +70,7 @@ class DeepSearch_one:
 	def reset_cookies(self):
 		self.cj = cookielib.LWPCookieJar()
 		self.br.set_cookiejar(self.cj)
-
+		log.info("Reset cookies")
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 	def mech_error_generic (self, e):
@@ -248,7 +248,7 @@ class DeepSearch_one:
 
 		data = res.get_data()  
 		timestamp_e = time.time()
-		print mainurl + " " + str(timestamp_e - timestamp_s)
+		log.info('TS ' + mainurl + " " + str(timestamp_e - timestamp_s))
 
 		soup = BeautifulSoup(data)
 

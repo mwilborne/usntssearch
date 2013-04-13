@@ -223,7 +223,8 @@ class SearchModule(object):
 	def parse_xmlsearch(self, urlParams, tout): 
 		parsed_data = []
 		#~ print self.queryURL  + ' ' + urlParams['apikey']
-		
+		timestamp_s = time.time()
+
 		try:
 			http_result = requests.get(url=self.queryURL, params=urlParams, verify=False, timeout=tout)
 					
@@ -234,7 +235,10 @@ class SearchModule(object):
 			#~ error_rlimit = str(e.args[0]).find('Max retries exceeded')
 			#~ print error_rlimit
 			return parsed_data
-					
+		timestamp_e = time.time()	
+		#~ print "NABAPI " + self.queryURL + " " + str(timestamp_e - timestamp_s)
+		log.info('TS ' + self.baseURL + " " + str(timestamp_e - timestamp_s))
+							
 		data = http_result.text
 		data = data.replace("<newznab:attr", "<newznab_attr")
 

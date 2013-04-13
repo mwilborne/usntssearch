@@ -30,6 +30,8 @@ import urlparse
 import urllib
 import datetime
 import json
+import numpy
+from operator import itemgetter
 
 log = logging.getLogger(__name__)
 
@@ -87,7 +89,47 @@ class DownloadedStats:
 			if(self.config[i]['builtin'] == 0):
 				self.cfg_urlidx.append(i)
 		
-
+	def get_generalstats(self,args):
+		log.info('Stats general have been requested')
+		savedurl = []
+		errstr = "WRONG KEY"
+		if('key'  not in args):
+			return errstr
+		else:	
+			if(args['key'] != self.cgen['stats_key']):
+				return errstr
+			daytochk = datetime.datetime.now().strftime("%Y-%m-%d") 
+		if('d'  in args):
+			daytochk=args['d']
+		subprocess.call([self.scriptsdir + ' '+self.logsdir + ' ' + daytochk ], shell=True, executable="/bin/bash")
+		
+		stat_info = {}
+		with open("/tmp/logstats_gen") as infile:
+			for line in infile:
+				value = line.split()
+				#~ print value
+				#~ print line
+				if(value[0] not in stat_info):
+					stat_info[value[0]] = []
+				else:	
+					stat_info[value[0]].append( float(value[1]) )
+			#~ print stat_info
+			 
+			stat_info_curated = []
+			uidx = 0
+			for key in stat_info.keys():
+				stat_info_curated_t = {}
+				stat_info_curated_t['succ_call'] = len(stat_info[key])
+				stat_info_curated_t['name'] = key
+				stat_info_curated_t['mean'] = numpy.mean(stat_info[key]) 
+				stat_info_curated_t['median'] = numpy.median(stat_info[key])
+				stat_info_curated_t['min'] = numpy.min(stat_info[key])
+				stat_info_curated_t['max'] =  numpy.max(stat_info[key])
+				stat_info_curated.append(stat_info_curated_t)
+				uidx += 1
+		
+			results = sorted(stat_info_curated, key=itemgetter('median'))
+		return render_template('stats_gen.html',stat_cur=stat_info_curated)
 
 	def get(self,args):
 		log.info('Stats have been requested')
@@ -98,8 +140,8 @@ class DownloadedStats:
 		else:	
 			if(args['key'] != self.cgen['stats_key']):
 				return errstr
-			
 			daytochk = datetime.datetime.now().strftime("%Y-%m-%d") 
+			
 		if('d'  in args):
 			daytochk=args['d']
 		subprocess.call([self.scriptsdir + ' '+self.logsdir + ' ' + daytochk ], shell=True, executable="/bin/bash")

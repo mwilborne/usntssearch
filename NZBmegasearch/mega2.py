@@ -77,6 +77,10 @@ dwn = miscdefs.DownloadedStats()
 @app.route('/sts_dwnl_gnr')
 def dstastprovide():	
 	return dwn.get(request.args)
+
+@app.route('/sts_gnr')
+def dstastgeneral():	
+	return dwn.get_generalstats(request.args)
 	
 
 @app.route('/legal')

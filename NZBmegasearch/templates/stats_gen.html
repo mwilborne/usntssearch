@@ -1,0 +1,11 @@
+<table>
+<tr><td> </td> <td> Success </td> <td> Median </td> <td> Mean </td> <td> Min </td> <td> Max </td></tr>
+	{% for row in stat_cur -%}
+	<tr><td> {{ row['name'] }} </td> <td> {{ row['succ_call'] }} </td> <td> {{ row['median'] }} </td> <td> {{ row['mean'] }} </td> <td> {{ row['min'] }} </td> <td> {{ row['max'] }} </td> </tr>
+
+	{%- endfor %}
+
+
+
+
+</table>
