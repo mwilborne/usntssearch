@@ -5,8 +5,11 @@
 		<title>NZB MegasearcH</title>
 		<link rel="stylesheet" type="text/css" href="static/reset2.css" />
 		<link rel="stylesheet" type="text/css" href="static/style.css" />
+		<link rel="stylesheet" href="static/toggle-switch.css">
 		<script type="text/javascript" src="static/jquery.min.js"></script>		
 		<script type="text/javascript" src="static/block-ui.js"></script>		
+
+		
 	</head>
 	<body>
 		<div id="container">
@@ -16,18 +19,36 @@
 			<div  class="titlemain"><img src="static/title.png" width="387" height="" /> 	</div>
 			
 			<form action="/s" method="get" class="form-wrapper-01">
-				<input type="text" id="search" placeholder="" name="q" value="{{ sstring }}">
-			<span>
-			<select class="selcatstlye" name="selcat">
-				<option value="">No categ.</option>			
-				{% for sopt in selectable_opt -%}
-					<option value={{ sopt[0] }} {{ sopt[2] }}>{{ sopt[1] }}</option>
-				{%- endfor %}
-			</select>
-			</span>
-				<input type="submit" value="Go" id="submit">
+			<table><tr>
+					<td>
+						<input type="text" id="search" placeholder="" name="q" value="{{ sstring }}">
+						<span>
+						<select class="selcatstlye" name="selcat">
+							<option value="">No categ.</option>			
+							{% for sopt in selectable_opt -%}
+								<option value={{ sopt[0] }} {{ sopt[2] }}>{{ sopt[1] }}</option>
+							{%- endfor %}
+						</select>
+						</span>
+						<table><tr><td class='searchkind'>mode:</td>
+							<td>
+							<span class="switch switch-three candy blue">
+							<input id="search_fast" name="tm" type="radio" value="0">
+							<label for="search_fast" onclick="">Quick</label>
+							<input id="search_medium" name="tm" type="radio" value="1" checked>	
+							<label for="search_medium" onclick="">Standard</label>
+							<input id="search_slow" name="tm" type="radio" value="2">	
+							<label for="search_slow" onclick="">Extensive</label>
+							<span class="slide-button"></span>
+							</span>
+							</td></tr></table>
+					</td>
+					<td style='width: 42px;'>
+						<input type="submit" value="Go" id="submit">
+					</td>
+					</tr>
+			</table>
 			</form>
-			<div class="providerlist">  {{ nc  }} NZB indeces are searched each time you hit the button :)	</div>
 			<table class ="suggarea_macro">
 				
 				<td style='vertical-align: top;'>
@@ -152,7 +173,7 @@
 			[ <a href= "connect"><img src="static/sick_logo.png" width="" height="16" style='vertical-align: bottom;' /><img src="static/cp_logo.png" width="" height="16" /><img src="static/ch_logo.png" width="" height="13" /></a> ] 			</div>		
 		</div>
 	
-		<div class="bottomcenter">ver. {{ vr['curver'] }}  <br/></div>
+		<div class="bottomcenter">ver. {{ vr['curver'] }} -- {{ nc  }} <br/></div>
 
 		{% if debug_flag == False  -%}
 			<!-- Start of StatCounter Code for Default Guide -->

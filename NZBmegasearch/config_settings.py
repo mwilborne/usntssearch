@@ -80,15 +80,16 @@ def	write_conf(request_form):
 def read_conf_deepsearch(): 
 	cfg_struct = []
 	parser = SafeConfigParser()
-	parser.read('deepsearch_params.ini')
+	parser.read('custom_params.ini')
 
-	numserver = parser.get('general', 'numserver')	
-
+	numserver = parser.get('general', 'deep_numserver')	
+ 
 	for i in xrange(int(numserver)):
-		d1 = {'url': parser.get('search_provider%d' % (i+1)  , 'url'),
-			  'user': parser.get('search_provider%d' % (i+1)  , 'user'),
-			  'pwd': parser.get('search_provider%d' % (i+1)  , 'pwd'),
-			  'valid': int(parser.get('search_provider%d' % (i+1)  , 'valid')),
+		d1 = {'url': parser.get('deep_search_provider%d' % (i+1)  , 'url'),
+			  'user': parser.get('deep_search_provider%d' % (i+1)  , 'user'),
+			  'pwd': parser.get('deep_search_provider%d' % (i+1)  , 'pwd'),
+			  'speed_class': parser.get('deep_search_provider%d' % (i+1)  , 'speed_class'),
+			  'valid': int(parser.get('deep_search_provider%d' % (i+1)  , 'valid')),
 			  }
 		cfg_struct.append(d1)
 	return 	cfg_struct
@@ -118,8 +119,11 @@ def read_conf_fn(forcedcustom=''):
 	gen_trends_refreshrate = int(parser.get('general', 'trends_refreshrate'))
 	gen_motd = parser.get('general', 'motd')
 	gen_stats_key = parser.get('general', 'stats_key')
+	gen_tslow = parser.get('general', 'timeout_slow')
+	gen_tfast = parser.get('general', 'timeout_fast')
 	co1 = {'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd, 'general_trend' : gen_trd, 
-			'default_timeout' : gen_timeout, 'max_cache_age' : gen_cacheage, 'log_backupcount': gen_log_backupcount, 
+			'default_timeout' : gen_timeout, 'timeout_slow' : gen_tslow, 'timeout_fast' : gen_tfast, 
+			'max_cache_age' : gen_cacheage, 'log_backupcount': gen_log_backupcount, 
 			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable, 'trends_refreshrate':gen_trends_refreshrate,
 			'stats_key' : gen_stats_key, 'motd':gen_motd}
 	
@@ -139,6 +143,7 @@ def read_conf_fn(forcedcustom=''):
 			d1 = {'url': cst_parser.get('search_provider%d' % (i+1)  , 'url'),
 				  'type': cst_parser.get('search_provider%d' % (i+1)  , 'type'),
 				  'api': cst_parser.get('search_provider%d' % (i+1)  , 'api'),
+				  'speed_class': parser.get('search_provider%d' % (i+1)  , 'speed_class'),
 				  'valid': int(cst_parser.get('search_provider%d' % (i+1)  , 'valid')),
 				  'timeout':  gen_timeout,
 				  'builtin': 0
@@ -168,6 +173,7 @@ def read_conf_fn(forcedcustom=''):
 			
 			d1 = {'valid': int(cst_parser.get('bi_search_provider%d' % (i+1)  , 'valid')),
 				  'type': cst_parser.get('bi_search_provider%d' % (i+1)  , 'type'),
+  				  'speed_class': parser.get('bi_search_provider%d' % (i+1)  , 'speed_class'),
 				  'login': lgn,
 				  'pwd': pwd,
 				  'timeout':  gen_timeout,
@@ -175,7 +181,9 @@ def read_conf_fn(forcedcustom=''):
 			cfg_struct.append(d1)
 	except Exception:
 			pass
-				
+
+ 
+							
 	#~ cst_parser.write(sys.stdout)	
 	return cfg_struct, co1
  

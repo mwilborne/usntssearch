@@ -32,7 +32,7 @@ import miscdefs
 import random
 import time
 
-DEBUGFLAG = False
+DEBUGFLAG = True
 
 motd = '\n\n~*~ ~*~ NZBMegasearcH ~*~ ~*~'
 print motd
@@ -71,6 +71,7 @@ mega_parall = megasearch.DoParallelSearch(cfg, cgen, ds)
 wrp = Warper (cgen, ds)
 apiresp = ApiResponses(cfg, wrp)
 dwn = miscdefs.DownloadedStats()
+
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 
@@ -92,7 +93,6 @@ def legal():
 
 @app.route('/s', methods=['GET'])
 def search():
-	
 	sugg.asktrend_allparallel()	
 	#~ parallel suggestion and search
 	if(DEBUGFLAG == False):
