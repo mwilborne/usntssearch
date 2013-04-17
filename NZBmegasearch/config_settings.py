@@ -88,8 +88,8 @@ def read_conf_deepsearch():
 		d1 = {'url': parser.get('deep_search_provider%d' % (i+1)  , 'url'),
 			  'user': parser.get('deep_search_provider%d' % (i+1)  , 'user'),
 			  'pwd': parser.get('deep_search_provider%d' % (i+1)  , 'pwd'),
-			  'speed_class': parser.get('deep_search_provider%d' % (i+1)  , 'speed_class'),
-			  'valid': int(parser.get('deep_search_provider%d' % (i+1)  , 'valid')),
+			  'speed_class': parser.getint('deep_search_provider%d' % (i+1)  , 'speed_class'),
+			  'valid': int(parser.getint('deep_search_provider%d' % (i+1)  , 'valid')),
 			  }
 		cfg_struct.append(d1)
 	return 	cfg_struct
@@ -119,10 +119,10 @@ def read_conf_fn(forcedcustom=''):
 	gen_trends_refreshrate = int(parser.get('general', 'trends_refreshrate'))
 	gen_motd = parser.get('general', 'motd')
 	gen_stats_key = parser.get('general', 'stats_key')
-	gen_tslow = parser.get('general', 'timeout_slow')
-	gen_tfast = parser.get('general', 'timeout_fast')
+	gen_tslow = int(parser.get('general', 'timeout_slow'))
+	gen_tfast = int(parser.get('general', 'timeout_fast'))
 	co1 = {'portno': portno, 'general_usr' : gen_user, 'general_pwd' : gen_pwd, 'general_trend' : gen_trd, 
-			'default_timeout' : gen_timeout, 'timeout_slow' : gen_tslow, 'timeout_fast' : gen_tfast, 
+			'default_timeout' : gen_timeout, 'timeout_class' : [gen_tfast, gen_timeout, gen_tslow ],
 			'max_cache_age' : gen_cacheage, 'log_backupcount': gen_log_backupcount, 
 			'log_size' : gen_log_size, 'seed_warptable' : gen_seed_warptable, 'trends_refreshrate':gen_trends_refreshrate,
 			'stats_key' : gen_stats_key, 'motd':gen_motd}
@@ -140,10 +140,13 @@ def read_conf_fn(forcedcustom=''):
 		numserver = cst_parser.get('general', 'numserver')	
 		#~ custom	 NAB
 		for i in xrange(int(numserver)):
+			spc = 2 
+			if(cst_parser.has_option('search_provider%d' % (i+1)  ,'speed_class')):
+				spc = cst_parser.getint('search_provider%d' % (i+1)  , 'speed_class')
 			d1 = {'url': cst_parser.get('search_provider%d' % (i+1)  , 'url'),
 				  'type': cst_parser.get('search_provider%d' % (i+1)  , 'type'),
 				  'api': cst_parser.get('search_provider%d' % (i+1)  , 'api'),
-				  'speed_class': parser.get('search_provider%d' % (i+1)  , 'speed_class'),
+				  'speed_class': spc,
 				  'valid': int(cst_parser.get('search_provider%d' % (i+1)  , 'valid')),
 				  'timeout':  gen_timeout,
 				  'builtin': 0
@@ -158,12 +161,19 @@ def read_conf_fn(forcedcustom=''):
 			gen_user = cst_parser.get('general', 'general_user')	
 			gen_pwd = cst_parser.get('general', 'general_pwd')	
 
-	except Exception:
+
+	except Exception as e:
+		print str(e)
 		return cfg_struct, co1
+
 	
 	try:
 		builtin_numserver = cst_parser.get('general', 'builtin_numserver')
 		for i in xrange(int(builtin_numserver)):	
+			spc = 2 
+			if(cst_parser.has_option('bi_search_provider%d' % (i+1)  ,'speed_class')):
+				spc = cst_parser.getint('bi_search_provider%d' % (i+1)  , 'speed_class')
+
 			ret = cst_parser.has_option('bi_search_provider%d' % (i+1), 'login')			
 			lgn= ''
 			pwd= ''
@@ -173,14 +183,15 @@ def read_conf_fn(forcedcustom=''):
 			
 			d1 = {'valid': int(cst_parser.get('bi_search_provider%d' % (i+1)  , 'valid')),
 				  'type': cst_parser.get('bi_search_provider%d' % (i+1)  , 'type'),
-  				  'speed_class': parser.get('bi_search_provider%d' % (i+1)  , 'speed_class'),
+  				  'speed_class': cst_parser.getint('bi_search_provider%d' % (i+1)  , 'speed_class'),
 				  'login': lgn,
 				  'pwd': pwd,
 				  'timeout':  gen_timeout,
 				  'builtin': 1}
+	  
 			cfg_struct.append(d1)
-	except Exception:
-			pass
+	except Exception as e:
+		print str(e)
 
  
 							

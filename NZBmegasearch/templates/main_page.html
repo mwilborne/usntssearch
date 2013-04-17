@@ -33,12 +33,11 @@
 						<table><tr><td class='searchkind'>mode:</td>
 							<td>
 							<span class="switch switch-three candy blue">
-							<input id="search_fast" name="tm" type="radio" value="0">
-							<label for="search_fast" onclick="">Quick</label>
-							<input id="search_medium" name="tm" type="radio" value="1" checked>	
-							<label for="search_medium" onclick="">Standard</label>
-							<input id="search_slow" name="tm" type="radio" value="2">	
-							<label for="search_slow" onclick="">Extensive</label>
+							{% for srchopt in search_opt -%}
+								<input id="search_option{{ srchopt[1] }}" name="tm" type="radio" value="{{ srchopt[1] }}" {{ srchopt[2] }}>
+								<label for="search_option{{ srchopt[1] }}" onclick="">{{ srchopt[0] }}</label>
+
+							{%- endfor %}
 							<span class="slide-button"></span>
 							</span>
 							</td></tr></table>
@@ -144,7 +143,7 @@
 			{% if exist -%}
 			<table id="results" summary="Detected duplicates">
 				<thead>
-					<tr><th scope="col" class=titlecell><b>Detected duplicates and weak matches</b></th>
+					<tr><th scope="col" class=titlecell><b>Detected duplicates</b></th>
 					    <th scope="col" class=sizecell><b>Type</b></th> 					
 						<th scope="col" class=sizecell><b>Size</b></th> 
 						<th scope="col" class=datecell><b>Days</b></th> 

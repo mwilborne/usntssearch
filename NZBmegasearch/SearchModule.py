@@ -131,6 +131,7 @@ def performSearch(queryString,  cfg, dsearch=None):
 
 	if(dsearch is not None):
 		for index in xrange(len(dsearch.ds)):
+			if(dsearch.ds[index].cur_cfg['valid'] == 1):
 				try:
 					t = threading.Thread(target=performSearchThreadDS, args=(queryString,lock,dsearch.ds[index]))
 					t.start()

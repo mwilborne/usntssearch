@@ -27,6 +27,7 @@ import config_settings
 from urllib2 import urlparse
 import socket
 import locale
+import copy
 
 log = logging.getLogger(__name__)
 
@@ -34,12 +35,33 @@ class DeepSearch:
 
 	def __init__(self, cur_cfg, cgen):
 		
+		self.cgen = cgen
+		self.cfg = copy.deepcopy(cur_cfg)
 		self.ds = []
 		count  = 0
 		for cfg in cur_cfg:
 			self.ds.append(DeepSearch_one(cfg, cgen))
 			self.ds[count].typesrch = 'DSN' + str(count)
 			count = count + 1
+	def get_validity(self):
+		for i in xrange(len(self.ds)):
+			self.ds[i].timeout = self.cgen['default_timeout']
+			self.ds[i].cur_cfg['valid'] = self.cfg[i]['valid']
+			
+	def restore(self):
+		for i in xrange(len(self.ds)):
+			self.ds[i].timeout = self.cgen['default_timeout']
+			self.ds[i].cur_cfg['valid'] = self.cfg[i]['valid']
+
+	def set_timeout_speedclass(self, rq_speed_class):
+		self.restore()
+		for i in xrange(len(self.ds)):
+			if ( (self.ds[i].cur_cfg['speed_class'] <=  rq_speed_class) and (self.ds[i].cur_cfg['valid'])):
+				self.ds[i].timeout = self.cgen['timeout_class'][  rq_speed_class  ]
+				#~ print "DP " + self.ds[i].cur_cfg['url'] + " " + str( self.ds[i].timeout ) + ' ' + str( rq_speed_class )
+			else:
+				self.ds[i].cur_cfg['valid']  = 0
+
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 	
 class DeepSearch_one:
@@ -148,12 +170,7 @@ class DeepSearch_one:
 				#~ print "Fetched exception login: " + str(e) 	
 				log.warning("Fetched exception login: " + str(e) + mainurl)
 				return False
-
-		#~ eternal cookies
-		#~ for cookie in self.br._ua_handlers['_cookies'].cookiejar:
-			#~ print cookie
-			#~ cookie.expires = None
-
+ 
 		return True		
 
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -217,17 +234,12 @@ class DeepSearch_one:
 			self.mech_error_generic(e)
 			return ''
 
-		#~ fname = tempfile.mktemp ()
-		#~ try:
-			#~ self.br.retrieve(urlname,fname)[0]
-			#~ return fname
-		#~ except Exception as e:
-			#~ log.warning(str(e) + " Failed to dowload : " + urlname)
-			#~ return ''
-
 	#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 					
 
 	def search(self, srchstr):
+		if(self.cur_cfg['valid'] == 0):
+			return []
+		
 		socket.setdefaulttimeout(self.timeout)
 		locale.setlocale( locale.LC_ALL, 'en_US.utf8' )
 		

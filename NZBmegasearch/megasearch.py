@@ -39,12 +39,22 @@ class DoParallelSearch:
 		self.cfg = conf
 		self.cgen = cgen
 		self.svalid = 0
+		self.svalid_speed = [0,0,0]
 		self.qry_nologic = ''
 		self.logic_items = []
+		self.ds = ds			
 		for i in xrange(len(self.cfg)):
 			if(self.cfg[i]['valid'] != 0):
-				self.svalid = self.svalid + 1
-		self.svalid = self.svalid + len(ds.ds)			
+				self.svalid_speed[ self.cfg[i]['speed_class'] ] = 1 + self.svalid_speed[ self.cfg[i]['speed_class'] ]
+
+		for i in xrange(len(self.ds.cfg)):
+			if(self.cfg[i]['valid'] != 0):
+				self.svalid_speed[ self.ds.cfg[i]['speed_class'] ] = 1 + self.svalid_speed[ self.ds.cfg[i]['speed_class'] ]
+			
+		self.svalid_speed[1] += self.svalid_speed[0]
+		self.svalid_speed[2] += self.svalid_speed[1]
+		self.svalid = self.svalid_speed[2]
+		
 		self.logic_expr = re.compile("(?:^|\s)([-+])(\w+)")
 		self.possibleopt = [ ['1080p', 'HD 1080p',''],
 							['720p','HD 720p',''],
@@ -58,10 +68,17 @@ class DoParallelSearch:
 							['ANDROID','Android',''],
 							['MOBI','Ebook (mobi)',''],
 							['EPUB','Ebook (epub)',''] ]
-		self.possibleopt_cpy = self.possibleopt							
-		self.ds = ds					
-				
+		self.searchopt = [ ['Quick ['+str(self.svalid_speed[0]) + ' idx]', 0,''],
+							['Normal ['+str(self.svalid_speed[1]) + ' idx]', 1,''],
+							['Extensive ['+str(self.svalid_speed[2]) + ' idx]', 2,'']]
+		self.searchopt_cpy = self.searchopt
+		self.possibleopt_cpy = self.possibleopt		
+		self.cfg_cpy = copy.deepcopy(self.cfg)
+		
 	def dosearch(self, args):
+		#~ restore originals
+		self.cfg = copy.deepcopy(self.cfg_cpy)
+		
 		if('q' not in args):
 			self.results = []
 			return self.results
@@ -72,6 +89,22 @@ class DoParallelSearch:
 		if('selcat' in args):
 			self.qry_nologic += " " + args['selcat']
 
+		#~ speed class
+		speed_class_sel = 1	
+		if('tm' in args):
+			speed_class_sel = int(args['tm'])
+		
+		#~ speed class deepsearch
+		self.ds.set_timeout_speedclass(speed_class_sel)
+		#~ speed class Nabbased	
+		for conf in self.cfg :
+			if ( (conf['speed_class'] <=  speed_class_sel) and (conf['valid'])):
+				conf['timeout']  = self.cgen['timeout_class'][ speed_class_sel ]
+				#~ print conf['type'] + " " + str(conf['timeout'] ) + ' ' + str(speed_class_sel )
+			else:
+				conf['valid']  = 0
+		 
+					
 		if( len(args['q']) == 0 ):
 			if('selcat' in args):
 				if(len(args['selcat'])==0):
@@ -90,6 +123,14 @@ class DoParallelSearch:
 		self.results = summary_results(results, self.qry_nologic, self.logic_items)
 		
 	def renderit(self,params):
+		params['search_opt']=  copy.deepcopy(self.searchopt)
+		search_def = 1
+		if('tm' in params['args']):
+			for j in xrange(len(params['search_opt'])):
+				if(params['search_opt'][j][1] == int(params['args']['tm'])):
+					search_def = j
+		params['search_opt'][ search_def ][2] = 'checked'
+
 		params['selectable_opt']=  copy.deepcopy(self.possibleopt)
 		params['motd']=self.cgen['motd']
 		if('selcat' in params['args']):
@@ -99,9 +140,11 @@ class DoParallelSearch:
 		return cleanUpResults(self.results, params['sugg'], params['ver'], params['args'], self.svalid, params)
 	
 	def renderit_empty(self,params):	
+		searchopt_local =  copy.deepcopy(self.searchopt)
+		searchopt_local[1][2] = 'checked'
 		return render_template('main_page.html', vr=params['ver'], nc=self.svalid, sugg = [], 
 								trend_show = params['trend_show'], trend_movie = params['trend_movie'], debug_flag = params['debugflag'],
-								sstring  = "", selectable_opt = self.possibleopt, motd = self.cgen['motd'])
+								sstring  = "", selectable_opt = self.possibleopt, search_opt = searchopt_local,  motd = self.cgen['motd'])
 		
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -255,4 +298,5 @@ def cleanUpResults(results, sugg_list, ver_notify, args, svalid, params):
 											debug_flag = params['debugflag'],
 											sstring  = params['args']['q'],
 											selectable_opt = params['selectable_opt'],
+											search_opt =  params['search_opt'],
 											motd = params['motd'] )
