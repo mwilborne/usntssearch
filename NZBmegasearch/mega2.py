@@ -14,9 +14,8 @@
 #~ You should have received a copy of the GNU General Public License
 #~ along with NZBmegasearch.  If not, see <http://www.gnu.org/licenses/>.
 # # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## # ## #    
-
 from flask import Flask
-from flask import request, Response, redirect
+from flask import request, Response, redirect, send_from_directory
 import logging
 import logging.handlers
 import os
@@ -74,6 +73,9 @@ dwn = miscdefs.DownloadedStats()
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
+@app.route('/robots.txt')
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])
 
 @app.route('/sts_dwnl_gnr')
 def dstastprovide():	
