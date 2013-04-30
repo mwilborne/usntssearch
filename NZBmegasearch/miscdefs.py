@@ -71,7 +71,17 @@ def requires_auth(f):
 
 
 #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+def save_remote_uous (args):
+
+	savename_uous = SearchModule.resource_path('logs/uous_stats.log')	
+	if('v' in args):
+		date_n = time.strftime('%Y-%m-%d %H:%M:%S')
 		
+		with open(savename_uous, "at") as myfile:
+			myfile.write(date_n + ' ' +args['v']+'\n')
+	return 'Ack'
+
+#~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 class DownloadedStats:
 	#~ megatransfer
 	def __init__(self):
