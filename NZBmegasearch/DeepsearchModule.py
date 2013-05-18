@@ -22,7 +22,7 @@ import datetime
 import mechanize
 import sys, logging
 import cookielib
-from BeautifulSoup  import BeautifulSoup 
+import beautifulsoup
 import config_settings
 from urllib2 import urlparse
 import socket
@@ -192,7 +192,7 @@ class DeepSearch_one:
 			return []
 
 		data = res.get_data()  
-		soup = BeautifulSoup(data)
+		soup = beautifulsoup.BeautifulSoup(data)
 
 		info = {}
 		for row in soup.findAll("tr"):
@@ -241,7 +241,7 @@ class DeepSearch_one:
 			return []
 		
 		socket.setdefaulttimeout(self.timeout)
-		locale.setlocale( locale.LC_ALL, 'en_US.utf8' )
+		#~ locale.setlocale( locale.LC_ALL, 'en_US.utf8' )
 		
 		if	(self.chkcookie() == False):
 			if(self.dologin() == False):
@@ -265,7 +265,7 @@ class DeepSearch_one:
 		timestamp_e = time.time()
 		log.info('TS ' + mainurl + " " + str(timestamp_e - timestamp_s))
 
-		soup = BeautifulSoup(data)
+		soup = beautifulsoup.BeautifulSoup(data)
 
 	#~ def searchDBG(self, srchstr):
 		#~ handler = open('tmp/tater.html').read()
@@ -288,9 +288,9 @@ class DeepSearch_one:
 				if(len(sz2s) == 2):
 					#~ print sz2s[1].lower()
 					if (sz2s[1].lower() == 'mb' ):
-						bytesize.append(int(self.basic_sz * locale.atof(sz2s[0])))
+						bytesize.append(int(self.basic_sz * float(sz2s[0].replace(',', '')) ))
 					if (sz2s[1].lower() == 'gb' ):
-						bytesize.append(int(self.basic_sz * locale.atof(sz2s[0]) * 1024))
+						bytesize.append(int(self.basic_sz * float(sz2s[0].replace(',', '')) * 1024))
 		#~ print bytesize
 
 		#~ 2010-05-08 18:53:09
